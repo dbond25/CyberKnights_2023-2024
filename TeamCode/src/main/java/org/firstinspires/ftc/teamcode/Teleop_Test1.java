@@ -141,9 +141,9 @@ public class Teleop_Test1 extends LinearOpMode {
             boolean outtake = gamepad2.left_bumper;
 
             if (intakePower == true)
-                intake.setPower (-0.75);
+                intake.setPower (-1);
             else if (outtake == true)
-                intake.setPower (+0.75);
+                intake.setPower (+1);
             else
                 intake.setPower(0);
 
