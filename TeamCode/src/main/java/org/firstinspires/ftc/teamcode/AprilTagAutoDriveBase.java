@@ -33,6 +33,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
@@ -86,19 +88,19 @@ import java.util.concurrent.TimeUnit;
  *
  */
 
-@TeleOp(name="Teleop_Test2", group = "Concept")
+@TeleOp(name="AprilTagAutoDriveBase", group = "Concept")
 //@Disabled
-public class Teleop_Test2 extends LinearOpMode
+public class AprilTagAutoDriveBase extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = 15; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE = 24   ; //  this is how close the camera should get to the target (inches)
 
     //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
     //  applied to the drive motors to correct the error.
     //  Drive = Error * Gain    Make these values smaller for smoother control, or larger for a more aggressive response.
-    final double SPEED_GAIN  =  0.04  ;   //  Forward Speed Control "Gain". eg: Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
-    final double STRAFE_GAIN =  0.06 ;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
-    final double TURN_GAIN   =  0.04  ;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
+    final double SPEED_GAIN  =  0.02  ;   //  Forward Speed Control "Gain". eg: Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
+    final double STRAFE_GAIN =  0.015 ;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
+    final double TURN_GAIN   =  0.01  ;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
 
     final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
     final double MAX_AUTO_STRAFE= 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
@@ -108,9 +110,13 @@ public class Teleop_Test2 extends LinearOpMode
     private DcMotor rightFrontDrive  = null;  //  Used to control the right front drive wheel
     private DcMotor leftBackDrive    = null;  //  Used to control the left back drive wheel
     private DcMotor rightBackDrive   = null;  //  Used to control the right back drive wheel
-
+    private DcMotor arm1 = null;
+    private DcMotor arm2 = null;
+    private Servo armServo = null;
+    private Servo claw = null;
+    double position = 0;
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
-    private static final int DESIRED_TAG_ID = 5;     // Choose the tag you want to approach or set to -1 for ANY tag.
+    private static int DESIRED_TAG_ID = 1;     // Choose the tag you want to approach or set to -1 for ANY tag.
     private VisionPortal visionPortal;               // Used to manage the video source.
     private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
     private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
@@ -132,14 +138,20 @@ public class Teleop_Test2 extends LinearOpMode
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
+        arm1 = hardwareMap.get(DcMotor.class, "arm1");
+        arm2 = hardwareMap.get(DcMotor.class, "arm2");
+        armServo = hardwareMap.get(Servo.class, "armServo");
+        claw = hardwareMap.get(Servo.class, "claw");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        arm1.setDirection(DcMotor.Direction.REVERSE);
+        arm2.setDirection(DcMotor.Direction.FORWARD);
 
         if (USE_WEBCAM)
             setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
@@ -154,6 +166,14 @@ public class Teleop_Test2 extends LinearOpMode
         {
             targetFound = false;
             desiredTag  = null;
+            double armPower = gamepad2.right_stick_y;
+
+            if (gamepad1.a){
+                DESIRED_TAG_ID = 1;
+            }
+            if (gamepad1.b){
+                DESIRED_TAG_ID = 4;
+            }
 
             // Step through the list of detected tags and look for a matching tag
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
@@ -206,13 +226,33 @@ public class Teleop_Test2 extends LinearOpMode
                 // drive using manual POV Joystick mode.  Slow things down to make the robot more controlable.
                 drive  = -gamepad1.left_stick_y;  // Reduce drive rate to 50%.
                 strafe = -gamepad1.left_stick_x;  // Reduce strafe rate to 50%.
-                turn   = -gamepad1.right_stick_x;  // Reduce turn rate to 33%.
+                turn   = -gamepad1.right_stick_x;// Reduce turn rate to 33%.
                 telemetry.addData("Manual","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
             }
             telemetry.update();
 
             // Apply desired axes motions to the drivetrain.
-            moveRobot(-drive, -strafe, -turn);
+            moveRobot(drive, strafe, turn);
+            arm1.setPower(armPower/2);
+            arm2.setPower(armPower/2);
+
+            // Left joystick y is arm servo
+            // Left bumper is open for claw, right is closed
+            if (gamepad2.left_stick_y > 0){
+                armServo.setPosition(armServo.getPosition() - 0.1);
+            }
+            if (gamepad2.left_stick_y < 0){
+                armServo.setPosition(armServo.getPosition() + 0.1);
+            }
+            if (gamepad2.left_bumper){
+                claw.setPosition(claw.getPosition() - 0.1);
+            }
+            if (gamepad2.right_bumper){
+                claw.setPosition(claw.getPosition() + 0.1);
+            }
+
+            telemetry.addData("Gamepad 2 Left Stick Y", gamepad2.left_stick_y);
+
             sleep(10);
         }
     }
