@@ -29,12 +29,10 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
@@ -44,6 +42,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainCon
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -90,7 +89,7 @@ import java.util.concurrent.TimeUnit;
 
 @TeleOp(name="Main_Teleop", group = "Concept")
 //@Disabled
-public class AprilTagAutoDriveBase extends LinearOpMode
+public class Main_Teleop extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
     final double DESIRED_DISTANCE = 24   ; //  this is how close the camera should get to the target (inches)
@@ -152,6 +151,9 @@ public class AprilTagAutoDriveBase extends LinearOpMode
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         arm1.setDirection(DcMotor.Direction.REVERSE);
         arm2.setDirection(DcMotor.Direction.FORWARD);
+
+        arm1.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        arm2.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
 
         if (USE_WEBCAM)
             setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
@@ -233,8 +235,8 @@ public class AprilTagAutoDriveBase extends LinearOpMode
 
             // Apply desired axes motions to the drivetrain.
             moveRobot(drive, strafe, turn);
-            arm1.setPower(armPower/3);
-            arm2.setPower(armPower/3);
+            arm1.setPower(armPower*0.5);
+            arm2.setPower(armPower*0.5);
 
             // Left joystick y is arm servo
             // Left bumper is open for claw, right is closed
