@@ -88,7 +88,7 @@ import java.util.concurrent.TimeUnit;
  *
  */
 
-@TeleOp(name="AprilTagAutoDriveBase", group = "Concept")
+@TeleOp(name="Main_Teleop", group = "Concept")
 //@Disabled
 public class AprilTagAutoDriveBase extends LinearOpMode
 {
@@ -224,31 +224,31 @@ public class AprilTagAutoDriveBase extends LinearOpMode
             } else {
 
                 // drive using manual POV Joystick mode.  Slow things down to make the robot more controlable.
-                drive  = -gamepad1.left_stick_y;  // Reduce drive rate to 50%.
-                strafe = -gamepad1.left_stick_x;  // Reduce strafe rate to 50%.
-                turn   = -gamepad1.right_stick_x;// Reduce turn rate to 33%.
+                drive  = -gamepad1.left_stick_y/1.5;  // Reduce drive rate to 50%.
+                strafe = -gamepad1.left_stick_x/1.5;  // Reduce strafe rate to 50%.
+                turn   = -gamepad1.right_stick_x/1.5;// Reduce turn rate to 33%.
                 telemetry.addData("Manual","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
             }
             telemetry.update();
 
             // Apply desired axes motions to the drivetrain.
             moveRobot(drive, strafe, turn);
-            arm1.setPower(armPower/2);
-            arm2.setPower(armPower/2);
+            arm1.setPower(armPower/3);
+            arm2.setPower(armPower/3);
 
             // Left joystick y is arm servo
             // Left bumper is open for claw, right is closed
             if (gamepad2.left_stick_y > 0){
-                armServo.setPosition(armServo.getPosition() - 0.1);
+                armServo.setPosition(armServo.getPosition() - 0.01);
             }
             if (gamepad2.left_stick_y < 0){
-                armServo.setPosition(armServo.getPosition() + 0.1);
+                armServo.setPosition(armServo.getPosition() + 0.01);
             }
             if (gamepad2.left_bumper){
-                claw.setPosition(claw.getPosition() - 0.1);
+                claw.setPosition(claw.getPosition() + 0.02);
             }
             if (gamepad2.right_bumper){
-                claw.setPosition(claw.getPosition() + 0.1);
+                claw.setPosition(claw.getPosition() - 0.02);
             }
 
             telemetry.addData("Gamepad 2 Left Stick Y", gamepad2.left_stick_y);

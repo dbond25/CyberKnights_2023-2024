@@ -87,7 +87,7 @@ import java.util.concurrent.TimeUnit;
  */
 
 @TeleOp(name="Teleop_Test2", group = "Concept")
-//@Disabled
+@Disabled
 public class Teleop_Test2 extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
