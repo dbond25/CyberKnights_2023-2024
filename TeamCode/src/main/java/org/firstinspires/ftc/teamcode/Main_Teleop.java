@@ -112,7 +112,8 @@ public class Main_Teleop extends LinearOpMode
     private DcMotor arm1 = null;
     private DcMotor arm2 = null;
     private Servo armServo = null;
-    private Servo claw = null;
+    private Servo leftClaw = null;
+    private Servo rightClaw = null;
     double position = 0;
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
     private static int DESIRED_TAG_ID = 1;     // Choose the tag you want to approach or set to -1 for ANY tag.
@@ -140,7 +141,8 @@ public class Main_Teleop extends LinearOpMode
         arm1 = hardwareMap.get(DcMotor.class, "arm1");
         arm2 = hardwareMap.get(DcMotor.class, "arm2");
         armServo = hardwareMap.get(Servo.class, "armServo");
-        claw = hardwareMap.get(Servo.class, "claw");
+        leftClaw = hardwareMap.get(Servo.class, "leftClaw");
+        rightClaw = hardwareMap.get(Servo.class, "rightClaw");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -246,11 +248,25 @@ public class Main_Teleop extends LinearOpMode
             if (gamepad2.left_stick_y < 0){
                 armServo.setPosition(armServo.getPosition() + 0.01);
             }
+
+            // Left servo open with left trigger, close with left bumper
+
+            // Right servo open with right trigger, close with right bumper
+
+            if (gamepad2.left_trigger != 0)
+            {
+                leftClaw.setPosition(leftClaw.getPosition() - 0.02);
+            }
             if (gamepad2.left_bumper){
-                claw.setPosition(claw.getPosition() + 0.02);
+                leftClaw.setPosition(leftClaw.getPosition() + 0.02);
+            }
+
+            if (gamepad2.right_trigger != 0)
+            {
+                rightClaw.setPosition(rightClaw.getPosition() - 0.02);
             }
             if (gamepad2.right_bumper){
-                claw.setPosition(claw.getPosition() - 0.02);
+                rightClaw.setPosition(rightClaw.getPosition() + 0.02);
             }
 
             telemetry.addData("Gamepad 2 Left Stick Y", gamepad2.left_stick_y);
