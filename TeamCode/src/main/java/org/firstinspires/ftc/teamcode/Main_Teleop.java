@@ -243,10 +243,10 @@ public class Main_Teleop extends LinearOpMode
             // Left joystick y is arm servo
             // Left bumper is open for claw, right is closed
             if (gamepad2.left_stick_y > 0){
-                armServo.setPosition(armServo.getPosition() - 0.01);
+                armServo.setPosition(armServo.getPosition() + 0.01);
             }
             if (gamepad2.left_stick_y < 0){
-                armServo.setPosition(armServo.getPosition() + 0.01);
+                armServo.setPosition(armServo.getPosition() - 0.01);
             }
 
             // Left servo open with left trigger, close with left bumper
@@ -255,21 +255,47 @@ public class Main_Teleop extends LinearOpMode
 
             if (gamepad2.left_trigger != 0)
             {
-                leftClaw.setPosition(leftClaw.getPosition() - 0.02);
+                leftClaw.setPosition(0.15);
             }
             if (gamepad2.left_bumper){
-                leftClaw.setPosition(leftClaw.getPosition() + 0.02);
+                leftClaw.setPosition(0);
             }
 
             if (gamepad2.right_trigger != 0)
             {
-                rightClaw.setPosition(rightClaw.getPosition() - 0.02);
+                rightClaw.setPosition(0.7);
             }
             if (gamepad2.right_bumper){
-                rightClaw.setPosition(rightClaw.getPosition() + 0.02);
+                rightClaw.setPosition(1);
+            }
+
+            // Right claw open position == 0.7, closed position == 1
+            // Left claw open position == 0.15, closed position == 0
+            if (rightClaw.getPosition() <= 0.7)
+            {
+                rightClaw.setPosition(0.7);
+            }
+            if (leftClaw.getPosition() >= 0.15)
+            {
+                leftClaw.setPosition(0.15);
+            }
+            // Map gamepad2 Down dpad to open and up d pad to close
+
+            if (gamepad2.dpad_down)
+            {
+                rightClaw.setPosition(0.7);
+                leftClaw.setPosition(0.15);
+            }
+            if (gamepad2.dpad_up)
+            {
+                rightClaw.setPosition(1);
+                leftClaw.setPosition(0);
             }
 
             telemetry.addData("Gamepad 2 Left Stick Y", gamepad2.left_stick_y);
+
+            telemetry.addData("Right Claw position", rightClaw.getPosition());
+            telemetry.addData("Left Claw position", leftClaw.getPosition());
 
             sleep(10);
         }
