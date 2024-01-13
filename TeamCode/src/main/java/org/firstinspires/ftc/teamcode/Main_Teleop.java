@@ -296,6 +296,7 @@ public class Main_Teleop extends LinearOpMode
 
             telemetry.addData("Right Claw position", rightClaw.getPosition());
             telemetry.addData("Left Claw position", leftClaw.getPosition());
+            telemetry.addData("Arm Servo position", armServo.getPosition());
 
             sleep(10);
         }
