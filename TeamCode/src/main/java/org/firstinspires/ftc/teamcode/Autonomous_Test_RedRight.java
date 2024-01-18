@@ -29,9 +29,10 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
@@ -44,7 +45,6 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
  * This OpMode illustrates using a camera to locate and drive towards a specific AprilTag.
@@ -88,7 +88,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(name="Autonomous_Test_BlueLeft", group = "Concept")
 //@Disabled
-public class Autonomous_Test_BlueLeft extends LinearOpMode
+public class Autonomous_Test_RedRight extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
     final double DESIRED_DISTANCE = 12.0; //  this is how close the camera should get to the target (inches)
@@ -215,12 +215,13 @@ public class Autonomous_Test_BlueLeft extends LinearOpMode
                 encoderDrive(0.7, 10, 10, 10);
                 order = 1;
             } else if (order == 1) {
-                encoderDrive(0.7, -5, 5, 10);
+                encoderDrive(0.7, 5, -5, 10);
                 order = 2;
             }
 
             // If we have found the desired target, Drive to target Automatically
             if (targetFound && !(rightFrontDrive.isBusy() && leftFrontDrive.isBusy())) {
+                    
 
                 // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
                 double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
