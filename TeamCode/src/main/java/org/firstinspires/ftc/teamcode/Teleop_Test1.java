@@ -65,7 +65,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Teleop_Test1", group="Linear OpMode")
+@TeleOp(name="Basic: Omni Linear OpMode", group="Linear OpMode")
 @Disabled
 public class Teleop_Test1 extends LinearOpMode {
 
@@ -77,7 +77,7 @@ public class Teleop_Test1 extends LinearOpMode {
     private DcMotor rightBackDrive = null;
     private DcMotor arm1 = null;
     private DcMotor arm2 = null;
-//    private DcMotor intake = null;
+    private DcMotor intake = null;
 
 
     @Override
@@ -91,7 +91,7 @@ public class Teleop_Test1 extends LinearOpMode {
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
         arm1 = hardwareMap.get(DcMotor.class, "arm1");
         arm2 = hardwareMap.get(DcMotor.class, "arm2");
-//        intake = hardwareMap.get(DcMotor.class, "intake");
+        intake = hardwareMap.get(DcMotor.class, "intake");
 
 
         // ########################################################################################
@@ -110,7 +110,7 @@ public class Teleop_Test1 extends LinearOpMode {
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         arm1.setDirection(DcMotor.Direction.REVERSE);
         arm2.setDirection(DcMotor.Direction.FORWARD);
-//        intake.setDirection(DcMotor.Direction.FORWARD);
+        intake.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -137,12 +137,15 @@ public class Teleop_Test1 extends LinearOpMode {
 
             double armPower = gamepad2.right_stick_y;
 
-//            boolean intakePower = gamepad2.right_bumper;
-//
-//            if (intakePower == true)
-//                intake.setPower(-0.75);
-//            else
-//                intake.setPower(0);
+            boolean intakePower = gamepad2.right_bumper;
+            boolean outtake = gamepad2.left_bumper;
+
+            if (intakePower == true)
+                intake.setPower (-1);
+            else if (outtake == true)
+                intake.setPower (+1);
+            else
+                intake.setPower(0);
 
             // Normalize the values so no wheel power exceeds 100%
             // This ensures that the robot maintains the desired motion.
@@ -179,8 +182,8 @@ public class Teleop_Test1 extends LinearOpMode {
             rightFrontDrive.setPower(rightFrontPower);
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
-            arm1.setPower(armPower);
-            arm2.setPower(armPower);
+            arm1.setPower(armPower*0.5);
+            arm2.setPower(armPower*0.5);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());

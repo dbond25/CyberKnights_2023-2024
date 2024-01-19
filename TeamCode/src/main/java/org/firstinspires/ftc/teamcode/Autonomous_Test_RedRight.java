@@ -29,13 +29,12 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.checkerframework.checker.units.qual.C;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
@@ -46,7 +45,6 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
  * This OpMode illustrates using a camera to locate and drive towards a specific AprilTag.
@@ -90,10 +88,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(name="Autonomous_Test_BlueLeft", group = "Concept")
 //@Disabled
-public class Autonomous_Test_BlueLeft extends LinearOpMode
+public class Autonomous_Test_RedRight extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = 8.0; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE = 12.0; //  this is how close the camera should get to the target (inches)
 
     //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
     //  applied to the drive motors to correct the error.
@@ -112,10 +110,6 @@ public class Autonomous_Test_BlueLeft extends LinearOpMode
     private DcMotor rightBackDrive   = null;  //  Used to control the right back drive wheel
     private DcMotor arm1 = null;
     private DcMotor arm2 = null;
-    private Servo leftClaw = null;
-    private Servo rightClaw = null;
-    private Servo armServo = null;
-
 
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
     private static final int DESIRED_TAG_ID = 1;     // Choose the tag you want to approach or set to -1 for ANY tag.
@@ -129,9 +123,9 @@ public class Autonomous_Test_BlueLeft extends LinearOpMode
     // For example, use a value of 2.0 for a 12-tooth spur gear driving a 24-tooth spur gear.
     // This is gearing DOWN for less speed and more torque.
     // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
-    static final double     COUNTS_PER_MOTOR_REV    = 28 ;    // eg: TETRIX Motor Encoder
-    static final double     DRIVE_GEAR_REDUCTION    = 20 ;     // No External Gearing.
-    static final double     WHEEL_DIAMETER_INCHES   = 2.95 ;     // For figuring circumference
+    static final double     COUNTS_PER_MOTOR_REV    = 2000 ;    // eg: TETRIX Motor Encoder
+    static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
+    static final double     WHEEL_DIAMETER_INCHES   = 1.89 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double     DRIVE_SPEED             = 0.6;
@@ -158,12 +152,6 @@ public class Autonomous_Test_BlueLeft extends LinearOpMode
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
         arm1 = hardwareMap.get(DcMotor.class, "arm1");
         arm2 = hardwareMap.get(DcMotor.class, "arm2");
-        // Right claw open position == 0.7, closed position == 1
-        // Left claw open position == 0.15, closed position == 0
-        // Arm servo raised position == 0, drop position ~= 0.11, down position == 0.6
-        armServo = hardwareMap.get(Servo.class, "armServo");
-        leftClaw = hardwareMap.get(Servo.class, "leftClaw");
-        rightClaw = hardwareMap.get(Servo.class, "rightClaw");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -177,10 +165,6 @@ public class Autonomous_Test_BlueLeft extends LinearOpMode
 
         arm1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arm2.setZeroPowerBehavior((DcMotor.ZeroPowerBehavior.BRAKE));
-
-        leftClaw.setPosition(0);
-        rightClaw.setPosition(1);
-        armServo.setPosition(0);
 
         if (USE_WEBCAM)
             setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
@@ -231,12 +215,13 @@ public class Autonomous_Test_BlueLeft extends LinearOpMode
                 encoderDrive(0.7, 10, 10, 10);
                 order = 1;
             } else if (order == 1) {
-                encoderDrive(0.7, -15, 15, 10);
+                encoderDrive(0.7, 5, -5, 10);
                 order = 2;
             }
 
             // If we have found the desired target, Drive to target Automatically
-            if (targetFound && order == 2) {
+            if (targetFound && !(rightFrontDrive.isBusy() && leftFrontDrive.isBusy())) {
+                    
 
                 // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
                 double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
@@ -250,12 +235,6 @@ public class Autonomous_Test_BlueLeft extends LinearOpMode
 
                 telemetry.addData("Auto","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
             }
-            else{
-                drive = 0;
-                turn = 0;
-                strafe = 0;
-            }
-
             telemetry.update();
 
             // Apply desired axes motions to the drivetrain.
@@ -371,30 +350,21 @@ public class Autonomous_Test_BlueLeft extends LinearOpMode
     public void encoderDrive(double speed,
                              double leftInches, double rightInches,
                              double timeoutS) {
-        int newLeftFrontTarget;
-        int newRightFrontTarget;
-        int newLeftBackTarget;
-        int newRightBackTarget;
+        int newLeftTarget;
+        int newRightTarget;
 
         // Ensure that the OpMode is still active
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
-            newLeftFrontTarget = leftFrontDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newRightFrontTarget = rightFrontDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
-            newLeftBackTarget = leftBackDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newRightBackTarget = rightBackDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
-
-            leftFrontDrive.setTargetPosition(newLeftFrontTarget);
-            rightFrontDrive.setTargetPosition(newRightFrontTarget);
-            leftBackDrive.setTargetPosition(newLeftBackTarget);
-            rightBackDrive.setTargetPosition(newRightBackTarget);
+            newLeftTarget = leftFrontDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightTarget = rightFrontDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            leftFrontDrive.setTargetPosition(newLeftTarget);
+            rightFrontDrive.setTargetPosition(newRightTarget);
 
             // Turn On RUN_TO_POSITION
             leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // reset the timeout time and start motion.
             runtime.reset();
@@ -414,10 +384,9 @@ public class Autonomous_Test_BlueLeft extends LinearOpMode
                     (leftFrontDrive.isBusy() && rightFrontDrive.isBusy())) {
 
                 // Display it for the driver.
-                telemetry.addData("Running to",  " %7d :%7d", newLeftFrontTarget,  newRightFrontTarget, newLeftBackTarget, newRightBackTarget);
+                telemetry.addData("Running to",  " %7d :%7d", newLeftTarget,  newRightTarget);
                 telemetry.addData("Currently at",  " at %7d :%7d",
-                        leftFrontDrive.getCurrentPosition(), rightFrontDrive.getCurrentPosition(), leftBackDrive.getCurrentPosition(),
-                        rightBackDrive.getCurrentPosition());
+                        leftFrontDrive.getCurrentPosition(), rightFrontDrive.getCurrentPosition());
                 telemetry.update();
             }
 
