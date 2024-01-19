@@ -86,7 +86,7 @@ import java.util.concurrent.TimeUnit;
  *
  */
 
-@Autonomous(name="Autonomous_Test_BlueLeft", group = "Concept")
+@Autonomous(name="Autonomous_Test_RedRight", group = "Concept")
 //@Disabled
 public class Autonomous_Test_RedRight extends LinearOpMode
 {
