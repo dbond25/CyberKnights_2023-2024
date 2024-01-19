@@ -93,7 +93,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class Autonomous_Test_BlueLeft extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = 8.0; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE = 12.0; //  this is how close the camera should get to the target (inches)
 
     //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
     //  applied to the drive motors to correct the error.
@@ -255,12 +255,93 @@ public class Autonomous_Test_BlueLeft extends LinearOpMode
                 turn = 0;
                 strafe = 0;
             }
-
-            telemetry.update();
+            // arm1 target to place pixels == -401
+            // arm2 target to place pixels == - 373
+            // armServo target to place pixels == 0.21
 
             // Apply desired axes motions to the drivetrain.
             moveRobot(drive, strafe, turn);
             sleep(10);
+
+            if(desiredTag!=null && desiredTag.ftcPose!=null) {
+                if (!(rightFrontDrive.isBusy() && leftFrontDrive.isBusy()) && order == 2 &&
+                        (desiredTag.ftcPose.range - DESIRED_DISTANCE < 1)) {
+
+                    telemetry.addData("\n>","Running arm movement code.\n");
+                    armServo.setPosition(0.21);
+
+                    leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    leftBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                    leftBackDrive.setPower(0);
+                    rightBackDrive.setPower(0);
+                    leftFrontDrive.setPower(0);
+                    rightBackDrive.setPower(0);
+
+                    arm1.setTargetPosition(-401);
+                    arm2.setTargetPosition(-373);
+
+                    // Add power to the arms in order for them to move!!!!
+
+                    arm1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    arm2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                    arm1.setPower(0.25);
+                    arm2.setPower(0.25);
+
+                    while (opModeIsActive() && arm1.isBusy() && arm2.isBusy()) {
+                        telemetry.addLine("Moving arm");
+                        telemetry.update();
+                    }
+
+                    arm1.setPower(0);
+                    arm2.setPower(0);
+
+                    while (true)
+                    {
+                        telemetry.addLine("Final arm position");
+                    }
+
+//                    leftClaw.setPosition(0.15);
+//                    rightClaw.setPosition(0.7);
+//
+//                    arm1.setTargetPosition(12);
+//                    arm2.setTargetPosition(37);
+//
+//                    arm1.setPower(0.1);
+//                    arm2.setPower(0.1);
+//
+//                    while (opModeIsActive() && arm1.isBusy() && arm2.isBusy()) {
+//                        telemetry.addLine("Moving arm");
+//                        telemetry.update();
+//                    }
+//
+//                    arm1.setPower(0);
+//                    arm2.setPower(0);
+//
+//                    arm1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    arm2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//
+//                    telemetry.addLine("Done");
+//
+//                    order = 3;
+
+//                    leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                }
+                else{
+                    telemetry.addData("\n>","desiredTag or desiredTag.ftcPose is not null.\n");
+                }
+            }
+            else{
+                telemetry.addData("\n>","desiredTag or desiredTag.ftcPose is null.\n");
+            }
+
+            telemetry.update();
         }
     }
 

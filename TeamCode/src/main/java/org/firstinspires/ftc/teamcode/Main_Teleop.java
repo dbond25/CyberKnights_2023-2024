@@ -157,6 +157,10 @@ public class Main_Teleop extends LinearOpMode
         arm1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arm2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        armServo.setPosition(1);
+        leftClaw.setPosition(0);
+        rightClaw.setPosition(1);
+
         if (USE_WEBCAM)
             setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
 
@@ -228,17 +232,17 @@ public class Main_Teleop extends LinearOpMode
             } else {
 
                 // drive using manual POV Joystick mode.  Slow things down to make the robot more controllable.
-                drive  = -gamepad1.left_stick_y;  // Reduce drive rate to 50%.
-                strafe = -gamepad1.left_stick_x;  // Reduce strafe rate to 50%.
-                turn   = -gamepad1.right_stick_x;// Reduce turn rate to 33%.
+                drive  = -gamepad1.left_stick_y * 0.75;  // Reduce drive rate to 50%.
+                strafe = -gamepad1.left_stick_x * 0.75;  // Reduce strafe rate to 50%.
+                turn   = -gamepad1.right_stick_x * 0.75;// Reduce turn rate to 33%.
                 telemetry.addData("Manual","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
             }
             telemetry.update();
 
             // Apply desired axes motions to the drivetrain.
             moveRobot(drive, strafe, turn);
-            arm1.setPower(armPower*0.8);
-            arm2.setPower(armPower*0.8);
+            arm1.setPower(armPower*0.5);
+            arm2.setPower(armPower*0.5);
 
             // Left joystick y is arm servo
             // Left bumper is open for claw, right is closed
@@ -297,6 +301,8 @@ public class Main_Teleop extends LinearOpMode
             telemetry.addData("Right Claw position", rightClaw.getPosition());
             telemetry.addData("Left Claw position", leftClaw.getPosition());
             telemetry.addData("Arm Servo position", armServo.getPosition());
+            telemetry.addData("Arm 1 position", arm1.getCurrentPosition());
+            telemetry.addData("Arm 2 position", arm2.getCurrentPosition());
 
             sleep(10);
         }
