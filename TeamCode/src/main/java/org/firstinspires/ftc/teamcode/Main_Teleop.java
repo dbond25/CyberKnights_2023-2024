@@ -241,8 +241,8 @@ public class Main_Teleop extends LinearOpMode
 
             // Apply desired axes motions to the drivetrain.
             moveRobot(drive, strafe, turn);
-            arm1.setPower(armPower * 0.5);
-            arm2.setPower(armPower * 0.5);
+            arm1.setPower(armPower * 0.7);
+            arm2.setPower(armPower * 0.7);
 
             // Left joystick y is arm servo
             // Left bumper is open for claw, right is closed
