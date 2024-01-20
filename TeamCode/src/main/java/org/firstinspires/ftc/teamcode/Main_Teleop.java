@@ -159,7 +159,7 @@ public class Main_Teleop extends LinearOpMode
 
         armServo.setPosition(1);
         leftClaw.setPosition(0);
-        rightClaw.setPosition(1);
+        rightClaw.setPosition(0.53);
 
         if (USE_WEBCAM)
             setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
@@ -241,8 +241,8 @@ public class Main_Teleop extends LinearOpMode
 
             // Apply desired axes motions to the drivetrain.
             moveRobot(drive, strafe, turn);
-            arm1.setPower(armPower*0.5);
-            arm2.setPower(armPower*0.5);
+            arm1.setPower(armPower * 0.5);
+            arm2.setPower(armPower * 0.5);
 
             // Left joystick y is arm servo
             // Left bumper is open for claw, right is closed
@@ -267,32 +267,24 @@ public class Main_Teleop extends LinearOpMode
 
             if (gamepad2.right_trigger != 0)
             {
-                rightClaw.setPosition(0.7);
+                rightClaw.setPosition(0);
             }
             if (gamepad2.right_bumper){
-                rightClaw.setPosition(1);
+                rightClaw.setPosition(0.53);
             }
 
-            // Right claw open position == 0.7, closed position == 1
+            // Right claw open position == 0, closed position == 0.53
             // Left claw open position == 0.15, closed position == 0
-            if (rightClaw.getPosition() <= 0.7)
-            {
-                rightClaw.setPosition(0.7);
-            }
-            if (leftClaw.getPosition() >= 0.15)
-            {
-                leftClaw.setPosition(0.15);
-            }
             // Map gamepad2 Down dpad to open and up d pad to close
 
             if (gamepad2.dpad_down)
             {
-                rightClaw.setPosition(0.7);
+                rightClaw.setPosition(0);
                 leftClaw.setPosition(0.15);
             }
             if (gamepad2.dpad_up)
             {
-                rightClaw.setPosition(1);
+                rightClaw.setPosition(0.53);
                 leftClaw.setPosition(0);
             }
 
