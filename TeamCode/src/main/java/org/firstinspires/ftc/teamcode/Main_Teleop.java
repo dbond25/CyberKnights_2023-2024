@@ -92,7 +92,7 @@ import java.util.concurrent.TimeUnit;
 public class Main_Teleop extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = 24   ; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE = 12   ; //  this is how close the camera should get to the target (inches)
 
     //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
     //  applied to the drive motors to correct the error.
@@ -157,12 +157,12 @@ public class Main_Teleop extends LinearOpMode
         arm1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arm2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        armServo.setPosition(1);
+        armServo.setPosition(0);
         leftClaw.setPosition(0);
         rightClaw.setPosition(0.53);
 
         if (USE_WEBCAM)
-            setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
+            setManualExposure(1, 250);  // Use low exposure time to reduce motion blur
 
         // Wait for driver to press start
         telemetry.addData("Camera preview on/off", "3 dots, Camera Stream");
@@ -253,6 +253,8 @@ public class Main_Teleop extends LinearOpMode
                 armServo.setPosition(armServo.getPosition() - 0.01);
             }
 
+            telemetry.addData("Gamepad2 Left Stick position", gamepad2.left_stick_y);
+
             // Left servo open with left trigger, close with left bumper
 
             // Right servo open with right trigger, close with right bumper
@@ -296,6 +298,43 @@ public class Main_Teleop extends LinearOpMode
                 rightClaw.setPosition(0.53);
                 leftClaw.setPosition(0);
             }
+
+            if (gamepad2.y){
+                armServo.setPosition(0.448);
+
+                arm1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                arm2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                arm1.setTargetPosition(-297);
+                arm2.setTargetPosition(-339);
+
+                arm1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                // Add power to the arms in order for them to move!!!!
+
+                arm1.setPower(0.1);
+                arm2.setPower(0.1);
+
+                while (opModeIsActive() && arm1.isBusy() && arm2.isBusy()) {
+                    telemetry.addLine("Moving arm");
+                    telemetry.update();
+                }
+
+                arm1.setPower(0);
+                arm2.setPower(0);
+
+                sleep(1000);
+
+                arm1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                arm2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+                arm1.setPower(armPower * 0.7);
+                arm2.setPower(armPower * 0.7);
+            }
+
+
+            // Gamepad2.y causes the arm to move up and go to the correct position to drop pixels
 
             telemetry.addData("Gamepad 2 Left Stick Y", gamepad2.left_stick_y);
 

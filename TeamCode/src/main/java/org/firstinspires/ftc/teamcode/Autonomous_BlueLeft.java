@@ -35,7 +35,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
-import org.checkerframework.checker.units.qual.C;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
@@ -88,9 +87,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  *
  */
 
-@Autonomous(name="Autonomous_Test_RedRight", group = "Concept")
+@Autonomous(name="Autonomous_BlueLeft", group = "Concept")
 //@Disabled
-public class Autonomous_Test_RedRight extends LinearOpMode
+public class Autonomous_BlueLeft extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
     final double DESIRED_DISTANCE = 12.0; //  this is how close the camera should get to the target (inches)
@@ -118,7 +117,7 @@ public class Autonomous_Test_RedRight extends LinearOpMode
 
 
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
-    private static final int DESIRED_TAG_ID = 4;     // Choose the tag you want to approach or set to -1 for ANY tag.
+    private static final int DESIRED_TAG_ID = 1;     // Choose the tag you want to approach or set to -1 for ANY tag.
     private VisionPortal visionPortal;               // Used to manage the video source.
     private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
     private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
@@ -180,10 +179,11 @@ public class Autonomous_Test_RedRight extends LinearOpMode
 
         leftClaw.setPosition(0);
         rightClaw.setPosition(0.53);
+        sleep(250);
         armServo.setPosition(0);
 
         if (USE_WEBCAM)
-            setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
+            setManualExposure(1, 250);  // Use low exposure time to reduce motion blur
 
         // Wait for driver to press start
         telemetry.addData("Camera preview on/off", "3 dots, Camera Stream");
@@ -231,7 +231,7 @@ public class Autonomous_Test_RedRight extends LinearOpMode
                 encoderDrive(0.7, 10, 10, 10);
                 order = 1;
             } else if (order == 1) {
-                encoderDrive(0.7, 15, -15, 10);
+                encoderDrive(0.7, -15, 15, 10);
                 order = 2;
             }
 
@@ -269,7 +269,7 @@ public class Autonomous_Test_RedRight extends LinearOpMode
                         (desiredTag.ftcPose.range - DESIRED_DISTANCE < 1)) {
 
                     telemetry.addData("\n>","Running arm movement code.\n");
-                    armServo.setPosition(0.428);
+                    armServo.setPosition(0.448);
 
                     leftFrontDrive.setTargetPosition(leftFrontDrive.getCurrentPosition());
                     leftBackDrive.setTargetPosition(leftBackDrive.getCurrentPosition());
@@ -280,7 +280,7 @@ public class Autonomous_Test_RedRight extends LinearOpMode
                     rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     leftBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
+                    
                     leftBackDrive.setPower(0);
                     rightBackDrive.setPower(0);
                     leftFrontDrive.setPower(0);
@@ -289,11 +289,11 @@ public class Autonomous_Test_RedRight extends LinearOpMode
                     arm1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     arm2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-                    arm1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    arm2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
                     arm1.setTargetPosition(-297);
                     arm2.setTargetPosition(-339);
+
+                    arm1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    arm2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
                     // Add power to the arms in order for them to move!!!!
 
@@ -349,10 +349,25 @@ public class Autonomous_Test_RedRight extends LinearOpMode
                 telemetry.addData("\n>","desiredTag or desiredTag.ftcPose is null.\n");
             }
 
-            if (order == 3)
-            {
-                encoderDrive(0.7, 2,2,5);
+            if (order == 3) {
+                encoderDrive(0.7, -15, 15, 10);
+                armServo.setPosition(0);
                 order = 4;
+            }
+
+            if (order == 4){
+                encoderDrive(0.7, 22,22,10);
+                order = 5;
+            }
+
+            if (order == 5){
+                encoderDrive(0.7, 15, -15, 10);
+                order = 6;
+            }
+
+            if (order == 6){
+                encoderDrive(0.7, 10, 10, 10);
+                order = 7;
             }
 
             telemetry.update();
