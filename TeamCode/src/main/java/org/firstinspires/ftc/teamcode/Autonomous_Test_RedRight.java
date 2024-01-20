@@ -286,6 +286,9 @@ public class Autonomous_Test_RedRight extends LinearOpMode
                     leftFrontDrive.setPower(0);
                     rightBackDrive.setPower(0);
 
+                    arm1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    arm2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
                     arm1.setTargetPosition(-624);
                     arm2.setTargetPosition(-376);
 
