@@ -88,7 +88,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  *
  */
 
-@Autonomous(name="Autonomous_Test_BlueLeft", group = "Concept")
+@Autonomous(name="Autonomous_Test_RedRight", group = "Concept")
 //@Disabled
 public class Autonomous_Test_RedRight extends LinearOpMode
 {
@@ -289,13 +289,13 @@ public class Autonomous_Test_RedRight extends LinearOpMode
                     arm1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     arm2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-                    arm1.setTargetPosition(-624);
-                    arm2.setTargetPosition(-376);
-
-                    // Add power to the arms in order for them to move!!!!
-
                     arm1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     arm2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                    arm1.setTargetPosition(-297);
+                    arm2.setTargetPosition(-339);
+
+                    // Add power to the arms in order for them to move!!!!
 
                     arm1.setPower(0.1);
                     arm2.setPower(0.1);
@@ -315,8 +315,8 @@ public class Autonomous_Test_RedRight extends LinearOpMode
 
                     sleep(1000);
 
-                    arm1.setTargetPosition(-268);
-                    arm2.setTargetPosition(36);
+                    arm1.setTargetPosition(0);
+                    arm2.setTargetPosition(0);
 
                     arm1.setPower(0.1);
                     arm2.setPower(0.1);
@@ -349,8 +349,11 @@ public class Autonomous_Test_RedRight extends LinearOpMode
                 telemetry.addData("\n>","desiredTag or desiredTag.ftcPose is null.\n");
             }
 
-
-
+            if (order == 3)
+            {
+                encoderDrive(0.7, 2,2,5);
+                order = 4;
+            }
 
             telemetry.update();
         }

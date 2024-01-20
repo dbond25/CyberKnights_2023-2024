@@ -257,6 +257,15 @@ public class Main_Teleop extends LinearOpMode
 
             // Right servo open with right trigger, close with right bumper
 
+            if (gamepad2.x)
+            {
+                arm1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                arm2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                arm1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                arm2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            }
+
             if (gamepad2.left_trigger != 0)
             {
                 leftClaw.setPosition(0.15);
