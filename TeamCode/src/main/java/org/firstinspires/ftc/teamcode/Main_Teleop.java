@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
@@ -111,6 +112,7 @@ public class Main_Teleop extends LinearOpMode
     private DcMotor rightBackDrive   = null;  //  Used to control the right back drive wheel
     private DcMotor arm1 = null;
     private DcMotor arm2 = null;
+    private DcMotor rope = null;
     private Servo armServo = null;
     private Servo leftClaw = null;
     private Servo rightClaw = null;
@@ -140,6 +142,7 @@ public class Main_Teleop extends LinearOpMode
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
         arm1 = hardwareMap.get(DcMotor.class, "arm1");
         arm2 = hardwareMap.get(DcMotor.class, "arm2");
+        rope = hardwareMap.get(DcMotor.class, "rope");
         armServo = hardwareMap.get(Servo.class, "armServo");
         leftClaw = hardwareMap.get(Servo.class, "leftClaw");
         rightClaw = hardwareMap.get(Servo.class, "rightClaw");
@@ -153,6 +156,7 @@ public class Main_Teleop extends LinearOpMode
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         arm1.setDirection(DcMotor.Direction.REVERSE);
         arm2.setDirection(DcMotor.Direction.FORWARD);
+        rope.setDirection(DcMotorSimple.Direction.FORWARD);
 
         arm1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arm2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -334,6 +338,20 @@ public class Main_Teleop extends LinearOpMode
             }
 
 
+
+            if(gamepad1.right_trigger != 0){
+                rope.setPower(0.5);
+
+            }
+            if(gamepad1.right_trigger == 0){
+                //rope.setTargetPosition();
+                rope.setPower(0);
+            }
+
+
+
+
+
             // Gamepad2.y causes the arm to move up and go to the correct position to drop pixels
 
             telemetry.addData("Gamepad 2 Left Stick Y", gamepad2.left_stick_y);
@@ -382,6 +400,7 @@ public class Main_Teleop extends LinearOpMode
         leftBackDrive.setPower(leftBackPower);
         rightBackDrive.setPower(rightBackPower);
     }
+
 
     /**
      * Initialize the AprilTag processor.
