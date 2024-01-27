@@ -230,7 +230,9 @@ public class Autonomous_RedRight extends LinearOpMode
             if (order == 0) {
                 encoderDrive(0.7, 10, 10, 10);
                 order = 1;
-            } else if (order == 1) {
+            }
+
+            if (order == 1) {
                 encoderDrive(0.7, 15, -15, 10);
                 order = 2;
             }

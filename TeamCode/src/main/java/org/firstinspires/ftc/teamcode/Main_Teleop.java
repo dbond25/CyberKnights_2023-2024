@@ -135,6 +135,8 @@ public class Main_Teleop extends LinearOpMode
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must match the names assigned during the robot configuration.
         // step (using the FTC Robot Controller app on the phone).
+
+        // Right may be incorrect right now
         leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
@@ -159,6 +161,8 @@ public class Main_Teleop extends LinearOpMode
 
         arm1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arm2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        rope.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         armServo.setPosition(0);
         leftClaw.setPosition(0);
@@ -336,20 +340,12 @@ public class Main_Teleop extends LinearOpMode
                 arm2.setPower(armPower * 0.7);
             }
 
-
-
             if(gamepad1.right_trigger != 0){
-                rope.setPower(0.5);
-
+                rope.setPower(1);
             }
-            if(gamepad1.right_trigger == 0){
-                //rope.setTargetPosition();
+            if (gamepad1.right_trigger == 0){
                 rope.setPower(0);
             }
-
-
-
-
 
             // Gamepad2.y causes the arm to move up and go to the correct position to drop pixels
 
