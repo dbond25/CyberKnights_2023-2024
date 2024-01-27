@@ -264,7 +264,7 @@ public class Autonomous_BlueLeft extends LinearOpMode
             }
 
             if (order == 1) {
-                encoderDrive(0.7, -15, 15, 10);
+                encoderDrive(0.7, 15, -15, 10);
                 order = 2;
             }
 
