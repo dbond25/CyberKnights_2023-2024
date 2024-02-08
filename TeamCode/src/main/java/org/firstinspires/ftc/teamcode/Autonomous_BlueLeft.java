@@ -172,7 +172,7 @@ public class Autonomous_BlueLeft extends LinearOpMode
 
         // Initialize the Apriltag Detection process
         initAprilTag();
-        initOpenCV();
+//        initOpenCV();
 
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must match the names assigned during the robot configuration.
