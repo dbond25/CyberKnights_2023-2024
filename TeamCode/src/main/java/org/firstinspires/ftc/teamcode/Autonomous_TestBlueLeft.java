@@ -177,6 +177,7 @@ public class Autonomous_TestBlueLeft extends LinearOpMode
         // Initialize the Apriltag Detection process
 //        initAprilTag();
         initOpenCV();
+//        initOpenCV();
 
 //        initSystems();
 
@@ -281,7 +282,7 @@ public class Autonomous_TestBlueLeft extends LinearOpMode
             }
 
             if (order == 1) {
-                encoderDrive(0.7, -15, 15, 10);
+                encoderDrive(0.7, 15, -15, 10);
                 order = 2;
             }
 
