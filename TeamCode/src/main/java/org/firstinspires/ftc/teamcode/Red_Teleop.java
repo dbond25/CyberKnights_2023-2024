@@ -29,10 +29,10 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
@@ -41,11 +41,9 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDir
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -90,9 +88,9 @@ import java.util.concurrent.TimeUnit;
  *
  */
 
-@TeleOp(name="Main_Teleop", group = "Concept")
+@TeleOp(name="Red_Teleop", group = "Concept")
 //@Disabled
-public class Main_Teleop extends LinearOpMode
+public class Red_Teleop extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
     final double DESIRED_DISTANCE = 19   ; //  this is how close the camera should get to the target (inches)
@@ -174,10 +172,10 @@ public class Main_Teleop extends LinearOpMode
         leftBackDrive.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
         rightFrontDrive.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
         rightBackDrive.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
-        arm1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        arm2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        arm1.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        arm2.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
 
-        rope.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rope.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
 
         armServo.setPosition(0);
         leftClaw.setPosition(0);
@@ -198,11 +196,14 @@ public class Main_Teleop extends LinearOpMode
             desiredTag  = null;
             double armPower = gamepad2.right_stick_y;
 
-            if (gamepad1.x){
-                DESIRED_TAG_ID = 2;
+            if (gamepad1.dpad_left){
+                DESIRED_TAG_ID = 4;
             }
-            if (gamepad1.b){
+            if (gamepad1.dpad_up){
                 DESIRED_TAG_ID = 5;
+            }
+            if (gamepad1.dpad_right){
+                DESIRED_TAG_ID = 6;
             }
 
             // Step through the list of detected tags and look for a matching tag
@@ -364,8 +365,8 @@ public class Main_Teleop extends LinearOpMode
                 arm1.setPower(armPower * 0.7);
                 arm2.setPower(armPower * 0.7);
 
-                arm1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                arm2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                arm1.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+                arm2.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
             }
 
             if (gamepad1.dpad_up){
@@ -474,8 +475,8 @@ public class Main_Teleop extends LinearOpMode
                 arm1.setPower(armPower * 0.7);
                 arm2.setPower(armPower * 0.7);
 
-                arm1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                arm2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                arm1.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+                arm2.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
             }
 
             if(gamepad1.right_trigger != 0){
