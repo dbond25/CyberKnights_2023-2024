@@ -42,15 +42,6 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainCon
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-// New imports for openCV
-import org.opencv.core.*;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.imgproc.Moments;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvPipeline;
-import java.util.ArrayList;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -96,12 +87,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  *
  */
 
-@Autonomous(name="Autonomous_BlueLeft", group = "Concept")
+@Autonomous(name="Autonomous_NearSideRed", group = "Concept")
 //@Disabled
-public class Autonomous_BlueLeft extends LinearOpMode
+public class Autonomous_NearSideRed extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = 12.0; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE = 16.0; //  this is how close the camera should get to the target (inches)
 
     //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
     //  applied to the drive motors to correct the error.
@@ -110,8 +101,8 @@ public class Autonomous_BlueLeft extends LinearOpMode
     final double STRAFE_GAIN =  0.015 ;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
     final double TURN_GAIN   =  0.01  ;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
 
-    final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
-    final double MAX_AUTO_STRAFE= 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
+    final double MAX_AUTO_SPEED = 0.3;   //  Clip the approach speed to this max value (adjust for your robot)
+    final double MAX_AUTO_STRAFE= 0.3;   //  Clip the approach speed to this max value (adjust for your robot)
     final double MAX_AUTO_TURN  = 0.3;   //  Clip the turn speed to this max value (adjust for your robot)
 
     private DcMotor leftFrontDrive   = null;  //  Used to control the left front drive wheel
@@ -126,7 +117,7 @@ public class Autonomous_BlueLeft extends LinearOpMode
 
 
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
-    private static final int DESIRED_TAG_ID = 1;     // Choose the tag you want to approach or set to -1 for ANY tag.
+    private static final int DESIRED_TAG_ID = 5;     // Choose the tag you want to approach or set to -1 for ANY tag.
     private VisionPortal visionPortal;               // Used to manage the video source.
     private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
     private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
@@ -139,29 +130,13 @@ public class Autonomous_BlueLeft extends LinearOpMode
     // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
     static final double     COUNTS_PER_MOTOR_REV    = 28 ;    // eg: TETRIX Motor Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 20 ;     // No External Gearing.
-    static final double     WHEEL_DIAMETER_INCHES   = 2.95 ;     // For figuring circumference
+    static final double     WHEEL_DIAMETER_INCHES   = 3.77;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double     DRIVE_SPEED             = 0.6;
     static final double     TURN_SPEED              = 0.5;
     private ElapsedTime     runtime = new ElapsedTime();
     private double order = 0;
-
-
-    // New variables for OpenCV
-    double cX = 0;
-    double cY = 0;
-    double width = 0;
-
-    private OpenCvCamera controlHubCam;  // Use OpenCvCamera class from FTC SDK
-    private static final int CAMERA_WIDTH = 960; // width  of wanted camera resolution
-    private static final int CAMERA_HEIGHT = 720; // height of wanted camera resolution
-
-    // Calculate the distance using the formula
-    public static final double objectWidthInRealWorldUnits = 3.25;  // Replace with the actual width of the object in real-world units
-    public static final double focalLength = 731.07;  // Replace with the focal length of the camera in pixels
-
-
 
     @Override public void runOpMode()
     {
@@ -172,7 +147,6 @@ public class Autonomous_BlueLeft extends LinearOpMode
 
         // Initialize the Apriltag Detection process
         initAprilTag();
-        initOpenCV();
 
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must match the names assigned during the robot configuration.
@@ -222,11 +196,6 @@ public class Autonomous_BlueLeft extends LinearOpMode
             targetFound = false;
             desiredTag  = null;
 
-
-            telemetry.addData("Coordinate", "(" + (int) cX + ", " + (int) cY + ")");
-            telemetry.addData("Distance in Inch", (getDistance(width)));
-            telemetry.update();
-
             // Step through the list of detected tags and look for a matching tag
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             for (AprilTagDetection detection : currentDetections) {
@@ -259,12 +228,13 @@ public class Autonomous_BlueLeft extends LinearOpMode
             }
 
             if (order == 0) {
-                encoderDrive(0.7, 10, 10, 10);
+//                sleep(13000);
+                encoderDrive(0.7, 15, 15, 10);
                 order = 1;
             }
 
             if (order == 1) {
-                encoderDrive(0.7, -15, 15, 10);
+                encoderDrive(0.7, 15, -15, 10);
                 order = 2;
             }
 
@@ -302,7 +272,7 @@ public class Autonomous_BlueLeft extends LinearOpMode
                         (desiredTag.ftcPose.range - DESIRED_DISTANCE < 1)) {
 
                     telemetry.addData("\n>","Running arm movement code.\n");
-                    armServo.setPosition(0.448);
+                    armServo.setPosition(0.428);
 
                     leftFrontDrive.setTargetPosition(leftFrontDrive.getCurrentPosition());
                     leftBackDrive.setTargetPosition(leftBackDrive.getCurrentPosition());
@@ -313,7 +283,7 @@ public class Autonomous_BlueLeft extends LinearOpMode
                     rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     leftBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    
+
                     leftBackDrive.setPower(0);
                     rightBackDrive.setPower(0);
                     leftFrontDrive.setPower(0);
@@ -322,8 +292,8 @@ public class Autonomous_BlueLeft extends LinearOpMode
                     arm1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     arm2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-                    arm1.setTargetPosition(-297);
-                    arm2.setTargetPosition(-339);
+                    arm1.setTargetPosition(-395);
+                    arm2.setTargetPosition(-409);
 
                     arm1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     arm2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -383,7 +353,7 @@ public class Autonomous_BlueLeft extends LinearOpMode
             }
 
             if (order == 3) {
-                encoderDrive(0.7, -15, 15, 10);
+                encoderDrive(0.7, 15, -15, 10);
                 armServo.setPosition(0);
                 order = 4;
             }
@@ -394,7 +364,7 @@ public class Autonomous_BlueLeft extends LinearOpMode
             }
 
             if (order == 5){
-                encoderDrive(0.7, 15, -15, 10);
+                encoderDrive(0.7, -15, 15, 10);
                 order = 6;
             }
 
@@ -405,8 +375,6 @@ public class Autonomous_BlueLeft extends LinearOpMode
 
             telemetry.update();
         }
-
-        controlHubCam.stopStreaming();
     }
 
     /**
@@ -581,111 +549,4 @@ public class Autonomous_BlueLeft extends LinearOpMode
             sleep(250);   // optional pause after each move.
         }
     }
-
-    private void initOpenCV() {
-
-        // Create an instance of the camera
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-                "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-
-        // Use OpenCvCameraFactory class from FTC SDK to create camera instance
-        controlHubCam = OpenCvCameraFactory.getInstance().createWebcam(
-                hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-
-        controlHubCam.setPipeline(new Autonomous_BlueLeft.YellowBlobDetectionPipeline());
-
-        controlHubCam.openCameraDevice();
-        controlHubCam.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
-    }
-    class YellowBlobDetectionPipeline extends OpenCvPipeline {
-        Mat hsvFrame = new Mat();
-        Mat hierarchy = new Mat();
-        Mat yellowMask = new Mat();
-
-        @Override
-        public Mat processFrame(Mat input) {
-            // Preprocess the frame to detect yellow regions
-            Mat yellowMask = preprocessFrame(input);
-
-            // Find contours of the detected yellow regions
-            List<MatOfPoint> contours = new ArrayList<>();
-//            Mat hierarchy = new Mat();
-            Imgproc.findContours(yellowMask, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-
-            // Find the largest yellow contour (blob)
-            MatOfPoint largestContour = findLargestContour(contours);
-
-            if (largestContour != null) {
-                // Draw a red outline around the largest detected object
-                Imgproc.drawContours(input, contours, contours.indexOf(largestContour), new Scalar(255, 0, 0), 2);
-                // Calculate the width of the bounding box
-                width = calculateWidth(largestContour);
-
-                // Display the width next to the label
-                String widthLabel = "Width: " + (int) width + " pixels";
-                Imgproc.putText(input, widthLabel, new Point(cX + 10, cY + 20), Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 255, 0), 2);
-                //Display the Distance
-                String distanceLabel = "Distance: " + String.format("%.2f", getDistance(width)) + " inches";
-                Imgproc.putText(input, distanceLabel, new Point(cX + 10, cY + 60), Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 255, 0), 2);
-                // Calculate the centroid of the largest contour
-                Moments moments = Imgproc.moments(largestContour);
-                cX = moments.get_m10() / moments.get_m00();
-                cY = moments.get_m01() / moments.get_m00();
-
-                // Draw a dot at the centroid
-                String label = "(" + (int) cX + ", " + (int) cY + ")";
-                Imgproc.putText(input, label, new Point(cX + 10, cY), Imgproc.FONT_HERSHEY_COMPLEX, 0.5, new Scalar(0, 255, 0), 2);
-                Imgproc.circle(input, new Point(cX, cY), 5, new Scalar(0, 255, 0), -1);
-
-            }
-
-            return input;
-        }
-
-        private Mat preprocessFrame(Mat frame) {
-//            Mat hsvFrame = new Mat();
-            Imgproc.cvtColor(frame, hsvFrame, Imgproc.COLOR_BGR2HSV);
-
-            Scalar lowerYellow = new Scalar(100, 100, 100);
-            Scalar upperYellow = new Scalar(180, 255, 255);
-
-
-//            Mat yellowMask = new Mat();
-            Core.inRange(hsvFrame, lowerYellow, upperYellow, yellowMask);
-
-            Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
-            Imgproc.morphologyEx(yellowMask, yellowMask, Imgproc.MORPH_OPEN, kernel);
-            Imgproc.morphologyEx(yellowMask, yellowMask, Imgproc.MORPH_CLOSE, kernel);
-
-            return yellowMask;
-        }
-
-        private MatOfPoint findLargestContour(List<MatOfPoint> contours) {
-            double maxArea = 0;
-            MatOfPoint largestContour = null;
-
-            for (MatOfPoint contour : contours) {
-                double area = Imgproc.contourArea(contour);
-                if (area > maxArea) {
-                    maxArea = area;
-                    largestContour = contour;
-                }
-            }
-
-            return largestContour;
-        }
-        private double calculateWidth(MatOfPoint contour) {
-            Rect boundingRect = Imgproc.boundingRect(contour);
-            return boundingRect.width;
-        }
-
-    }
-    private static double getDistance(double width){
-        double distance = (objectWidthInRealWorldUnits * focalLength) / width;
-        return distance;
-    }
-
 }
-
-// .;l;llm ml.,;,l,l,kkpp,p,klpmk,pk,l;k,llkklkklkllkklklklklklklklklklklklklklklklkllkklklklklklklklkllklkkllkklklklklklklklklkllkklkllkklklkllklkklkllklkkllklkklklkllkkllklklklklklkkklklklklklklklklklklklklklklklklklklklkklklklkllklklkllklklkkkk0kkkkkkkkkkkkkkkkkk44444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444488888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666
-// By Alli

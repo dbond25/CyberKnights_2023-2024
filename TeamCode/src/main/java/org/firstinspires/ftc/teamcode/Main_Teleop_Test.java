@@ -33,6 +33,7 @@ import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
@@ -45,7 +46,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -90,9 +90,9 @@ import java.util.concurrent.TimeUnit;
  *
  */
 
-@TeleOp(name="Main_Teleop", group = "Concept")
+@TeleOp(name="Main_Teleop_Test", group = "Concept")
 //@Disabled
-public class Main_Teleop extends LinearOpMode
+public class Main_Teleop_Test extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
     final double DESIRED_DISTANCE = 19   ; //  this is how close the camera should get to the target (inches)
@@ -152,11 +152,11 @@ public class Main_Teleop extends LinearOpMode
         armServo = hardwareMap.get(Servo.class, "armServo");
         leftClaw = hardwareMap.get(Servo.class, "leftClaw");
         rightClaw = hardwareMap.get(Servo.class, "rightClaw");
-//        sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_distance");
+        sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_distance");
 
         // you can also cast this to a Rev2mDistanceSensor if you want to use added
         // methods associated with the Rev2mDistanceSensor class.
-//        Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor) sensorDistance;
+        Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor) sensorDistance;
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -169,15 +169,10 @@ public class Main_Teleop extends LinearOpMode
         arm2.setDirection(DcMotor.Direction.FORWARD);
         rope.setDirection(DcMotor.Direction.FORWARD);
 
+        arm1.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        arm2.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
 
-        leftFrontDrive.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
-        leftBackDrive.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
-        rightFrontDrive.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
-        rightBackDrive.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
-        arm1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        arm2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        rope.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rope.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
 
         armServo.setPosition(0);
         leftClaw.setPosition(0);
@@ -269,10 +264,10 @@ public class Main_Teleop extends LinearOpMode
             // Left joystick y is arm servo
             // Left bumper is open for claw, right is closed
             if (gamepad2.left_stick_y > 0){
-                armServo.setPosition(1);
+                armServo.setPosition(armServo.getPosition() + 0.015);
             }
             if (gamepad2.left_stick_y < 0){
-                armServo.setPosition(0.4);
+                armServo.setPosition(armServo.getPosition() - 0.015);
             }
 
             telemetry.addData("Gamepad2 Left Stick position", gamepad2.left_stick_y);
@@ -318,8 +313,11 @@ public class Main_Teleop extends LinearOpMode
                 arm1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 arm2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-                arm1.setTargetPosition(-395);
-                arm2.setTargetPosition(-409);
+//                arm1.setTargetPosition(-395);
+//                arm2.setTargetPosition(-409);
+
+                arm1.setTargetPosition(-200);
+                arm2.setTargetPosition(-214);
 
                 arm1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 arm2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -336,36 +334,36 @@ public class Main_Teleop extends LinearOpMode
                     strafe = -gamepad1.left_stick_x * 0.75;  // Reduce strafe rate to 50%.
                     turn   = -gamepad1.right_stick_x * 0.75;// Reduce turn rate to 33%.
                     moveRobot(drive,strafe,turn);
-//                    if (gamepad2.left_trigger != 0)
-//                    {
-//                        leftClaw.setPosition(0.15);
-//                    }
-//                    if (gamepad2.left_bumper){
-//                        leftClaw.setPosition(0);
-//                    }
-//
-//                    if (gamepad2.right_trigger != 0)
-//                    {
-//                        rightClaw.setPosition(0);
-//                    }
-//                    if (gamepad2.right_bumper){
-//                        rightClaw.setPosition(0.53);
-//                    }
+                    if (gamepad2.left_trigger != 0)
+                    {
+                        leftClaw.setPosition(0.15);
+                    }
+                    if (gamepad2.left_bumper){
+                        leftClaw.setPosition(0);
+                    }
+
+                    if (gamepad2.right_trigger != 0)
+                    {
+                        rightClaw.setPosition(0);
+                    }
+                    if (gamepad2.right_bumper){
+                        rightClaw.setPosition(0.53);
+                    }
                 }
 
                 arm1.setPower(0);
                 arm2.setPower(0);
 
-                sleep(1000);
-
-                arm1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                arm2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-                arm1.setPower(armPower * 0.7);
-                arm2.setPower(armPower * 0.7);
-
-                arm1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                arm2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//                sleep(1000);
+//
+//                arm1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                arm2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//
+//                arm1.setPower(armPower * 0.7);
+//                arm2.setPower(armPower * 0.7);
+//
+//                arm1.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+//                arm2.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
             }
 
             if (gamepad1.dpad_up){
@@ -474,8 +472,8 @@ public class Main_Teleop extends LinearOpMode
                 arm1.setPower(armPower * 0.7);
                 arm2.setPower(armPower * 0.7);
 
-                arm1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                arm2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                arm1.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+                arm2.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
             }
 
             if(gamepad1.right_trigger != 0){
@@ -498,15 +496,15 @@ public class Main_Teleop extends LinearOpMode
             telemetry.addData("Arm 1 position", arm1.getCurrentPosition());
             telemetry.addData("Arm 2 position", arm2.getCurrentPosition());
 
-//            telemetry.addData("deviceName", sensorDistance.getDeviceName() );
-//            telemetry.addData("range", String.format("%.01f mm", sensorDistance.getDistance(DistanceUnit.MM)));
-//            telemetry.addData("range", String.format("%.01f cm", sensorDistance.getDistance(DistanceUnit.CM)));
-//            telemetry.addData("range", String.format("%.01f m", sensorDistance.getDistance(DistanceUnit.METER)));
-//            telemetry.addData("range", String.format("%.01f in", sensorDistance.getDistance(DistanceUnit.INCH)));
-//
-//            // Rev2mDistanceSensor specific methods.
-//            telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
-//            telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
+            telemetry.addData("deviceName", sensorDistance.getDeviceName() );
+            telemetry.addData("range", String.format("%.01f mm", sensorDistance.getDistance(DistanceUnit.MM)));
+            telemetry.addData("range", String.format("%.01f cm", sensorDistance.getDistance(DistanceUnit.CM)));
+            telemetry.addData("range", String.format("%.01f m", sensorDistance.getDistance(DistanceUnit.METER)));
+            telemetry.addData("range", String.format("%.01f in", sensorDistance.getDistance(DistanceUnit.INCH)));
+
+            // Rev2mDistanceSensor specific methods.
+            telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
+            telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
 
             telemetry.update();
 

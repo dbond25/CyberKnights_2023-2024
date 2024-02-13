@@ -29,23 +29,20 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -90,12 +87,12 @@ import java.util.concurrent.TimeUnit;
  *
  */
 
-@TeleOp(name="Main_Teleop", group = "Concept")
+@Autonomous(name="Autonomous_FarSideBlue", group = "Concept")
 //@Disabled
-public class Main_Teleop extends LinearOpMode
+public class Autonomous_FarSideBlue extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = 19   ; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE = 17.0; //  this is how close the camera should get to the target (inches)
 
     //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
     //  applied to the drive motors to correct the error.
@@ -104,9 +101,9 @@ public class Main_Teleop extends LinearOpMode
     final double STRAFE_GAIN =  0.015 ;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
     final double TURN_GAIN   =  0.01  ;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
 
-    final double MAX_AUTO_SPEED = 0.7;   //  Clip the approach speed to this max value (adjust for your robot)
-    final double MAX_AUTO_STRAFE= 0.7;   //  Clip the approach speed to this max value (adjust for your robot)
-    final double MAX_AUTO_TURN  = 0.5;   //  Clip the turn speed to this max value (adjust for your robot)
+    final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
+    final double MAX_AUTO_STRAFE= 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
+    final double MAX_AUTO_TURN  = 0.3;   //  Clip the turn speed to this max value (adjust for your robot)
 
     private DcMotor leftFrontDrive   = null;  //  Used to control the left front drive wheel
     private DcMotor rightFrontDrive  = null;  //  Used to control the right front drive wheel
@@ -114,21 +111,37 @@ public class Main_Teleop extends LinearOpMode
     private DcMotor rightBackDrive   = null;  //  Used to control the right back drive wheel
     private DcMotor arm1 = null;
     private DcMotor arm2 = null;
-    private DcMotor rope = null;
-    private Servo armServo = null;
     private Servo leftClaw = null;
     private Servo rightClaw = null;
-    double position = 0;
+    private Servo armServo = null;
+
+
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
-    private static int DESIRED_TAG_ID = 2;     // Choose the tag you want to approach or set to -1 for ANY tag.
+    private static final int DESIRED_TAG_ID = 2;     // Choose the tag you want to approach or set to -1 for ANY tag.
     private VisionPortal visionPortal;               // Used to manage the video source.
     private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
     private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
 
-    private DistanceSensor sensorDistance;
+    // Calculate the COUNTS_PER_INCH for your specific drive train.
+    // Go to your motor vendor website to determine your motor's COUNTS_PER_MOTOR_REV
+    // For external drive gearing, set DRIVE_GEAR_REDUCTION as needed.
+    // For example, use a value of 2.0 for a 12-tooth spur gear driving a 24-tooth spur gear.
+    // This is gearing DOWN for less speed and more torque.
+    // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
+    static final double     COUNTS_PER_MOTOR_REV    = 28 ;    // eg: TETRIX Motor Encoder
+    static final double     DRIVE_GEAR_REDUCTION    = 20 ;     // No External Gearing.
+    static final double     WHEEL_DIAMETER_INCHES   = 3.77 ;     // For figuring circumference
+    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double     DRIVE_SPEED             = 0.6;
+    static final double     TURN_SPEED              = 0.5;
+    private ElapsedTime     runtime = new ElapsedTime();
+    private double order = 0;
+
 
     @Override public void runOpMode()
     {
+
         boolean targetFound     = false;    // Set to true when an AprilTag target is detected
         double  drive           = 0;        // Desired forward power/speed (-1 to +1)
         double  strafe          = 0;        // Desired strafe power/speed (-1 to +1)
@@ -140,23 +153,18 @@ public class Main_Teleop extends LinearOpMode
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must match the names assigned during the robot configuration.
         // step (using the FTC Robot Controller app on the phone).
-
-        // Right may be incorrect right now
         leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
         arm1 = hardwareMap.get(DcMotor.class, "arm1");
         arm2 = hardwareMap.get(DcMotor.class, "arm2");
-        rope = hardwareMap.get(DcMotor.class, "rope");
+//        // Right claw open position == 0.7, closed position == 1
+//        // Left claw open position == 0.15, closed position == 0
+//        // Arm servo raised position == 0, drop position ~= 0.11, down position == 0.6
         armServo = hardwareMap.get(Servo.class, "armServo");
         leftClaw = hardwareMap.get(Servo.class, "leftClaw");
         rightClaw = hardwareMap.get(Servo.class, "rightClaw");
-//        sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_distance");
-
-        // you can also cast this to a Rev2mDistanceSensor if you want to use added
-        // methods associated with the Rev2mDistanceSensor class.
-//        Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor) sensorDistance;
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -167,21 +175,14 @@ public class Main_Teleop extends LinearOpMode
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         arm1.setDirection(DcMotor.Direction.REVERSE);
         arm2.setDirection(DcMotor.Direction.FORWARD);
-        rope.setDirection(DcMotor.Direction.FORWARD);
 
-
-        leftFrontDrive.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
-        leftBackDrive.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
-        rightFrontDrive.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
-        rightBackDrive.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
         arm1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        arm2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        arm2.setZeroPowerBehavior((DcMotor.ZeroPowerBehavior.BRAKE));
 
-        rope.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        armServo.setPosition(0);
         leftClaw.setPosition(0);
         rightClaw.setPosition(0.53);
+        sleep(250);
+        armServo.setPosition(0);
 
         if (USE_WEBCAM)
             setManualExposure(1, 250);  // Use low exposure time to reduce motion blur
@@ -192,20 +193,14 @@ public class Main_Teleop extends LinearOpMode
         telemetry.update();
         waitForStart();
 
+        telemetry.addLine("Outside While Loop...");
+        int counter = 0;
         while (opModeIsActive())
         {
             targetFound = false;
             desiredTag  = null;
-            double armPower = gamepad2.right_stick_y;
-
-            if (gamepad1.x){
-                DESIRED_TAG_ID = 2;
-            }
-            if (gamepad1.b){
-                DESIRED_TAG_ID = 5;
-            }
-
-            // Step through the list of detected tags and look for a matching tag
+            telemetry.addLine("Starting while loop..." + counter);
+//             Step through the list of detected tags and look for a matching tag
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             for (AprilTagDetection detection : currentDetections) {
                 // Look to see if we have size info on this tag.
@@ -228,18 +223,34 @@ public class Main_Teleop extends LinearOpMode
 
             // Tell the driver what we see, and what to do.
             if (targetFound) {
-                telemetry.addData("\n>","HOLD Left-Bumper to Drive to Target\n");
                 telemetry.addData("Found", "ID %d (%s)", desiredTag.id, desiredTag.metadata.name);
                 telemetry.addData("Range",  "%5.1f inches", desiredTag.ftcPose.range);
                 telemetry.addData("Bearing","%3.0f degrees", desiredTag.ftcPose.bearing);
                 telemetry.addData("Yaw","%3.0f degrees", desiredTag.ftcPose.yaw);
             } else {
-                telemetry.addData("\n>","Drive using joysticks to find valid target\n");
+                telemetry.addData("\n>","No target found\n");
             }
 
-            // If Left Bumper is being pressed, AND we have found the desired target, Drive to target Automatically .
-            if (gamepad1.left_bumper && targetFound) {
+            if (order == 0) {
+                encoderDrive(0.7, 42, 42, 10);
+                armServo.setPosition(0.448);
+                order = 1;
+            }
 
+            if (order == 1) {
+                encoderDrive(0.7, -19, 19, 10);
+                armServo.setPosition(0.5);
+                sleep(500);
+                encoderDrive(0.7,36,36,10);
+                armServo.setPosition(0);
+                sleep(500);
+                encoderDrive(0.7, -7, 7, 10);
+                order = 2;
+            }
+
+            // If we have found the desired target, Drive to target Automatically
+            if (targetFound && order == 2) {
+//            if(targetFound){
                 // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
                 double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
                 double  headingError    = desiredTag.ftcPose.bearing;
@@ -251,267 +262,131 @@ public class Main_Teleop extends LinearOpMode
                 strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
 
                 telemetry.addData("Auto","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
-            } else {
-
-                // drive using manual POV Joystick mode.  Slow things down to make the robot more controllable.
-                drive  = -gamepad1.left_stick_y * 0.75;  // Reduce drive rate to 50%.
-                strafe = -gamepad1.left_stick_x * 0.75;  // Reduce strafe rate to 50%.
-                turn   = -gamepad1.right_stick_x * 0.75;// Reduce turn rate to 33%.
-                telemetry.addData("Manual","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
             }
-            telemetry.update();
+            else{
+                drive = 0;
+                turn = 0;
+                strafe = 0;
+            }
+            // arm1 target to place pixels == -401
+
+            // arm2 target to place pixels == - 373
+            // armServo target to place pixels == 0.21
 
             // Apply desired axes motions to the drivetrain.
             moveRobot(drive, strafe, turn);
-            arm1.setPower(armPower * 0.7);
-            arm2.setPower(armPower * 0.7);
-
-            // Left joystick y is arm servo
-            // Left bumper is open for claw, right is closed
-            if (gamepad2.left_stick_y > 0){
-                armServo.setPosition(1);
-            }
-            if (gamepad2.left_stick_y < 0){
-                armServo.setPosition(0.4);
-            }
-
-            telemetry.addData("Gamepad2 Left Stick position", gamepad2.left_stick_y);
-
-            // Left servo open with left trigger, close with left bumper
-
-            // Right servo open with right trigger, close with right bumper
-
-            if (gamepad2.left_trigger != 0)
-            {
-                leftClaw.setPosition(0.15);
-            }
-            if (gamepad2.left_bumper){
-                leftClaw.setPosition(0);
-            }
-
-            if (gamepad2.right_trigger != 0)
-            {
-                rightClaw.setPosition(0);
-            }
-            if (gamepad2.right_bumper){
-                rightClaw.setPosition(0.53);
-            }
-
-            // Right claw open position == 0, closed position == 0.53
-            // Left claw open position == 0.15, closed position == 0
-            // Map gamepad2 Down dpad to open and up d pad to close
-
-            if (gamepad2.dpad_down)
-            {
-                rightClaw.setPosition(0);
-                leftClaw.setPosition(0.15);
-            }
-            if (gamepad2.dpad_up)
-            {
-                rightClaw.setPosition(0.53);
-                leftClaw.setPosition(0);
-            }
-
-            if (gamepad2.y){
-                armServo.setPosition(0.402);
-
-                arm1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                arm2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-                arm1.setTargetPosition(-395);
-                arm2.setTargetPosition(-409);
-
-                arm1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-                // Add power to the arms in order for them to move!!!!
-
-                arm1.setPower(0.1);
-                arm2.setPower(0.1);
-
-                while (opModeIsActive() && arm1.isBusy() && arm2.isBusy()) {
-                    telemetry.addLine("Moving arm");
-                    telemetry.update();
-                    drive  = -gamepad1.left_stick_y * 0.75;  // Reduce drive rate to 50%.
-                    strafe = -gamepad1.left_stick_x * 0.75;  // Reduce strafe rate to 50%.
-                    turn   = -gamepad1.right_stick_x * 0.75;// Reduce turn rate to 33%.
-                    moveRobot(drive,strafe,turn);
-//                    if (gamepad2.left_trigger != 0)
-//                    {
-//                        leftClaw.setPosition(0.15);
-//                    }
-//                    if (gamepad2.left_bumper){
-//                        leftClaw.setPosition(0);
-//                    }
-//
-//                    if (gamepad2.right_trigger != 0)
-//                    {
-//                        rightClaw.setPosition(0);
-//                    }
-//                    if (gamepad2.right_bumper){
-//                        rightClaw.setPosition(0.53);
-//                    }
-                }
-
-                arm1.setPower(0);
-                arm2.setPower(0);
-
-                sleep(1000);
-
-                arm1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                arm2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-                arm1.setPower(armPower * 0.7);
-                arm2.setPower(armPower * 0.7);
-
-                arm1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                arm2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            }
-
-            if (gamepad1.dpad_up){
-                arm1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                arm2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-                arm1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                arm2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            }
-
-            if (gamepad2.a){
-                arm1.setTargetPosition(0);
-                arm2.setTargetPosition(0);
-
-                arm1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-                arm1.setPower(0.1);
-                arm2.setPower(0.1);
-
-                while (opModeIsActive() && arm1.isBusy() && arm2.isBusy()) {
-                    telemetry.addLine("Moving arm");
-                    telemetry.update();
-                    drive  = -gamepad1.left_stick_y * 0.75;  // Reduce drive rate to 50%.
-                    strafe = -gamepad1.left_stick_x * 0.75;  // Reduce strafe rate to 50%.
-                    turn   = -gamepad1.right_stick_x * 0.75;// Reduce turn rate to 33%.
-                    moveRobot(drive,strafe,turn);
-                    if (gamepad2.left_trigger != 0)
-                    {
-                        leftClaw.setPosition(0.15);
-                    }
-                    if (gamepad2.left_bumper){
-                        leftClaw.setPosition(0);
-                    }
-
-                    if (gamepad2.right_trigger != 0)
-                    {
-                        rightClaw.setPosition(0);
-                    }
-                    if (gamepad2.right_bumper){
-                        rightClaw.setPosition(0.53);
-                    }
-                }
-
-                arm1.setPower(0);
-                arm2.setPower(0);
-
-                arm1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                arm2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-                telemetry.addLine("Done");
-
-                arm1.setPower(armPower * 0.7);
-                arm2.setPower(armPower * 0.7);
-            }
-
-            if (gamepad2.x){
-                armServo.setPosition(0.448);
-
-                arm1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                arm2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-                arm1.setTargetPosition(-203);
-                arm2.setTargetPosition(-193);
-
-                arm1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-                // Add power to the arms in order for them to move!!!!
-
-                arm1.setPower(0.1);
-                arm2.setPower(0.1);
-
-                while (opModeIsActive() && arm1.isBusy() && arm2.isBusy()) {
-                    telemetry.addLine("Moving arm");
-                    telemetry.update();
-                    drive  = -gamepad1.left_stick_y * 0.75;  // Reduce drive rate to 50%.
-                    strafe = -gamepad1.left_stick_x * 0.75;  // Reduce strafe rate to 50%.
-                    turn   = -gamepad1.right_stick_x * 0.75;// Reduce turn rate to 33%.
-                    moveRobot(drive,strafe,turn);
-                    if (gamepad2.left_trigger != 0)
-                    {
-                        leftClaw.setPosition(0.15);
-                    }
-                    if (gamepad2.left_bumper){
-                        leftClaw.setPosition(0);
-                    }
-
-                    if (gamepad2.right_trigger != 0)
-                    {
-                        rightClaw.setPosition(0);
-                    }
-                    if (gamepad2.right_bumper){
-                        rightClaw.setPosition(0.53);
-                    }
-                }
-
-                arm1.setPower(0);
-                arm2.setPower(0);
-
-                sleep(1000);
-
-                arm1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                arm2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-                arm1.setPower(armPower * 0.7);
-                arm2.setPower(armPower * 0.7);
-
-                arm1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                arm2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            }
-
-            if(gamepad1.right_trigger != 0){
-                rope.setPower(1);
-            }
-            if (gamepad1.right_trigger == 0){
-                rope.setPower(0);
-            }
-            if (gamepad1.right_bumper){
-                rope.setPower(-1);
-            }
-
-            // Gamepad2.y causes the arm to move up and go to the correct position to drop pixels
-
-            telemetry.addData("Gamepad 2 Left Stick Y", gamepad2.left_stick_y);
-
-            telemetry.addData("Right Claw position", rightClaw.getPosition());
-            telemetry.addData("Left Claw position", leftClaw.getPosition());
-            telemetry.addData("Arm Servo position", armServo.getPosition());
-            telemetry.addData("Arm 1 position", arm1.getCurrentPosition());
-            telemetry.addData("Arm 2 position", arm2.getCurrentPosition());
-
-//            telemetry.addData("deviceName", sensorDistance.getDeviceName() );
-//            telemetry.addData("range", String.format("%.01f mm", sensorDistance.getDistance(DistanceUnit.MM)));
-//            telemetry.addData("range", String.format("%.01f cm", sensorDistance.getDistance(DistanceUnit.CM)));
-//            telemetry.addData("range", String.format("%.01f m", sensorDistance.getDistance(DistanceUnit.METER)));
-//            telemetry.addData("range", String.format("%.01f in", sensorDistance.getDistance(DistanceUnit.INCH)));
-//
-//            // Rev2mDistanceSensor specific methods.
-//            telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
-//            telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
-
-            telemetry.update();
-
             sleep(10);
+
+            if(desiredTag!=null && desiredTag.ftcPose!=null) {
+                if (!(rightFrontDrive.isBusy() && leftFrontDrive.isBusy()) && order == 2 &&
+                        (desiredTag.ftcPose.range - DESIRED_DISTANCE < 1)) {
+
+                    telemetry.addData("\n>","Running arm movement code.\n");
+                    armServo.setPosition(0.448);
+
+                    leftFrontDrive.setTargetPosition(leftFrontDrive.getCurrentPosition());
+                    leftBackDrive.setTargetPosition(leftBackDrive.getCurrentPosition());
+                    rightFrontDrive.setTargetPosition(rightFrontDrive.getCurrentPosition());
+                    rightBackDrive.setTargetPosition(rightBackDrive.getCurrentPosition());
+
+                    leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    leftBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                    leftBackDrive.setPower(0);
+                    rightBackDrive.setPower(0);
+                    leftFrontDrive.setPower(0);
+                    rightBackDrive.setPower(0);
+
+                    arm1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    arm2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                    arm1.setTargetPosition(-395);
+                    arm2.setTargetPosition(-409);
+
+                    arm1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    arm2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                    // Add power to the arms in order for them to move!!!!
+
+                    arm1.setPower(0.1);
+                    arm2.setPower(0.1);
+
+                    while (opModeIsActive() && arm1.isBusy() && arm2.isBusy()) {
+                        telemetry.addLine("Moving arm");
+                        telemetry.update();
+                    }
+
+                    arm1.setPower(0);
+                    arm2.setPower(0);
+
+                    sleep(1000);
+
+                    leftClaw.setPosition(0.15);
+                    rightClaw.setPosition(0);
+
+                    sleep(1000);
+
+                    arm1.setTargetPosition(0);
+                    arm2.setTargetPosition(0);
+
+                    arm1.setPower(0.1);
+                    arm2.setPower(0.1);
+
+                    while (opModeIsActive() && arm1.isBusy() && arm2.isBusy()) {
+                        telemetry.addLine("Moving arm");
+                        telemetry.update();
+                    }
+
+                    arm1.setPower(0);
+                    arm2.setPower(0);
+
+                    arm1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    arm2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+                    telemetry.addLine("Done");
+
+                    order = 3;
+
+                    leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                }
+                else{
+                    telemetry.addData("\n>","desiredTag or desiredTag.ftcPose is not null.\n");
+                }
+            }
+            else{
+                telemetry.addData("\n>","desiredTag or desiredTag.ftcPose is null.\n");
+            }
+
+            if (order == 3) {
+                encoderDrive(0.7, -15, 15, 10);
+                armServo.setPosition(0);
+                order = 4;
+            }
+
+            if (order == 4){
+                encoderDrive(0.7, 22,22,10);
+                order = 5;
+            }
+
+            if (order == 5){
+                encoderDrive(0.7, 15, -15, 10);
+                order = 6;
+            }
+
+            if (order == 6){
+                encoderDrive(0.7, 10, 10, 10);
+                order = 7;
+            }
+            telemetry.addLine("Finishing while loop..."+ counter);
+            counter ++;
+            telemetry.update();
         }
+
     }
 
     /**
@@ -549,7 +424,6 @@ public class Main_Teleop extends LinearOpMode
         rightBackDrive.setPower(rightBackPower);
     }
 
-
     /**
      * Initialize the AprilTag processor.
      */
@@ -579,6 +453,7 @@ public class Main_Teleop extends LinearOpMode
                     .build();
         }
     }
+
 
     /*
      Manually set the camera gain and exposure.
@@ -617,4 +492,97 @@ public class Main_Teleop extends LinearOpMode
             sleep(20);
         }
     }
+
+
+    public void encoderDrive(double speed,
+                             double leftInches, double rightInches,
+                             double timeoutS) {
+        int newLeftFrontTarget;
+        int newRightFrontTarget;
+        int newLeftBackTarget;
+        int newRightBackTarget;
+
+        leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        // Ensure that the OpMode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            newLeftFrontTarget = leftFrontDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightFrontTarget = rightFrontDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            newLeftBackTarget = leftBackDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightBackTarget = rightBackDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+
+            leftFrontDrive.setTargetPosition(newLeftFrontTarget);
+            rightFrontDrive.setTargetPosition(newRightFrontTarget);
+            leftBackDrive.setTargetPosition(newLeftBackTarget);
+            rightBackDrive.setTargetPosition(newRightBackTarget);
+
+            // Turn On RUN_TO_POSITION
+            leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            leftBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            leftFrontDrive.setPower(Math.abs(speed));
+            leftBackDrive.setPower(Math.abs(speed));
+            rightFrontDrive.setPower(Math.abs(speed));
+            rightBackDrive.setPower(Math.abs(speed));
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+            // its target position, the motion will stop.  This is "safer" in the event that the robot will
+            // always end the motion as soon as possible.
+            // However, if you require that BOTH motors have finished their moves before the robot continues
+            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+            while (opModeIsActive() &&
+                    (runtime.seconds() < timeoutS) &&
+                    (leftFrontDrive.isBusy() && rightFrontDrive.isBusy() &&
+                            leftBackDrive.isBusy() && rightBackDrive.isBusy())) {
+
+//                leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+//                leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
+//                rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+//                rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+//                arm1.setDirection(DcMotor.Direction.REVERSE);
+//                arm2.setDirection(DcMotor.Direction.FORWARD);
+                // Display it for the driver.
+                telemetry.addData("Power of motors", " %7.3f :%7.3f :%7.3f :%7.3f", leftFrontDrive.getPower(), rightFrontDrive.getPower(),
+                        leftBackDrive.getPower(), rightBackDrive.getPower());
+                telemetry.addLine("Direction of motors" + leftFrontDrive.getDirection().toString() +" :" + rightFrontDrive.getDirection().toString() +
+                        " :" + leftBackDrive.getDirection().toString() + " :" +rightBackDrive.getDirection().toString());
+                telemetry.addData("Running to",  " %7d :%7d :%7d :%7d", newLeftFrontTarget,  newRightFrontTarget, newLeftBackTarget, newRightBackTarget);
+                telemetry.addData("Currently at",  " at %7d :%7d :%7d :%7d",
+                        leftFrontDrive.getCurrentPosition(), rightFrontDrive.getCurrentPosition(), leftBackDrive.getCurrentPosition(),
+                        rightBackDrive.getCurrentPosition());
+                telemetry.update();
+            }
+
+            telemetry.addData("Update", "......Out of while loop......");
+            telemetry.update();
+
+            // Stop all motion;
+            leftFrontDrive.setPower(0);
+            rightFrontDrive.setPower(0);
+            leftBackDrive.setPower(0);
+            rightBackDrive.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            sleep(250);   // optional pause after each move.
+        }
+    }
+
 }
+
+// .;l;llm ml.,;,l,l,kkpp,p,klpmk,pk,l;k,llkklkklkllkklklklklklklklklklklklklklklklkllkklklklklklklklkllklkkllkklklklklklklklklkllkklkllkklklkllklkklkllklkkllklkklklkllkkllklklklklklkkklklklklklklklklklklklklklklklklklklklkklklklkllklklkllklklkkkk0kkkkkkkkkkkkkkkkkk44444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444488888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666
+// By Alli
