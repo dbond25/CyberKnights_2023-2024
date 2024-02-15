@@ -237,7 +237,7 @@ public class Autonomous_NearSideBlue extends LinearOpMode
             }
 
             if (order == 1) {
-                encoderDrive(0.7, -15, 15, 10);
+                encoderDrive(0.7, -14, 16, 10);
                 order = 2;
             }
 
