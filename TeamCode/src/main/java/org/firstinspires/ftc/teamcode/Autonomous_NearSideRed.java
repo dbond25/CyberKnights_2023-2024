@@ -234,7 +234,7 @@ public class Autonomous_NearSideRed extends LinearOpMode
             }
 
             if (order == 1) {
-                encoderDrive(0.7, 15, -15, 10);
+                encoderDrive(0.7, 16, -16, 10);
                 order = 2;
             }
 
@@ -258,10 +258,6 @@ public class Autonomous_NearSideRed extends LinearOpMode
                 turn = 0;
                 strafe = 0;
             }
-            // arm1 target to place pixels == -401
-
-            // arm2 target to place pixels == - 373
-            // armServo target to place pixels == 0.21
 
             // Apply desired axes motions to the drivetrain.
             moveRobot(drive, strafe, turn);

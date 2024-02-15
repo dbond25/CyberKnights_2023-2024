@@ -88,9 +88,9 @@ import java.util.concurrent.TimeUnit;
  *
  */
 
-@TeleOp(name="Red_Teleop", group = "Concept")
+@TeleOp(name="display_Teleop", group = "Concept")
 //@Disabled
-public class Red_Teleop extends LinearOpMode
+public class display_Teleop extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
     final double DESIRED_DISTANCE = 19   ; //  this is how close the camera should get to the target (inches)
@@ -255,9 +255,9 @@ public class Red_Teleop extends LinearOpMode
             } else {
 
                 // drive using manual POV Joystick mode.  Slow things down to make the robot more controllable.
-                drive  = -gamepad1.left_stick_y * 0.75;  // Reduce drive rate to 50%.
-                strafe = -gamepad1.left_stick_x * 0.75;  // Reduce strafe rate to 50%.
-                turn   = -gamepad1.right_stick_x * 0.75;// Reduce turn rate to 33%.
+                drive  = -gamepad1.left_stick_y;  // Reduce drive rate to 50%.
+                strafe = -gamepad1.left_stick_x;  // Reduce strafe rate to 50%.
+                turn   = -gamepad1.right_stick_x;// Reduce turn rate to 33%.
                 telemetry.addData("Manual","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
             }
             telemetry.update();

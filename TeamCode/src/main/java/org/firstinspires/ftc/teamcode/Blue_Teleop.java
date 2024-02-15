@@ -369,7 +369,7 @@ public class Blue_Teleop extends LinearOpMode
                 arm2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             }
 
-            if (gamepad1.dpad_up){
+            if (gamepad1.dpad_down){
                 arm1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 arm2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 

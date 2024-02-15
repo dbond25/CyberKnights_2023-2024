@@ -29,12 +29,10 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -97,9 +95,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  *
  */
 
-@Autonomous(name="Autonomous_TestBlueLeft", group = "Concept")
+@Autonomous(name="Autonomous_TestRed", group = "Concept")
 //@Disabled
-public class Autonomous_TestBlueLeft extends LinearOpMode
+public class Autonomous_TestRed extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
     final double DESIRED_DISTANCE = 12.0; //  this is how close the camera should get to the target (inches)
@@ -161,7 +159,10 @@ public class Autonomous_TestBlueLeft extends LinearOpMode
 
     // Calculate the distance using the formula
     public static final double objectWidthInRealWorldUnits = 3.375;  // Replace with the actual width of the object in real-world units
-    public static final double focalLength = 731.07;  // Replace with the focal length of the camera in pixels
+    public static final double focalLength = 1431.11;  // Replace with the focal length of the camera in pixels
+
+    double spikeTarget = 0;
+    public double maxArea = 0;
 
 
 
@@ -175,6 +176,9 @@ public class Autonomous_TestBlueLeft extends LinearOpMode
         boolean aprilTagInitComplete = false;
 
         // Initialize the Apriltag Detection process
+
+        webcam1 = hardwareMap.get(WebcamName.class, "Webcam 1");
+
 //        initAprilTag();
         initOpenCV();
 //        initOpenCV();
@@ -221,21 +225,53 @@ public class Autonomous_TestBlueLeft extends LinearOpMode
         // Wait for driver to press start
         telemetry.addData("Camera preview on/off", "3 dots, Camera Stream");
         telemetry.addData(">", "Touch Play to start OpMode");
+        telemetry.addData("cX is equal to", cX);
+        telemetry.addData("maxArea is equal to", maxArea);
+
         telemetry.update();
         waitForStart();
 
+        // Moving these down to initOpenCV Method because cX and maxArea are reset to 0
+//        if (cX < 600 && maxArea > 5000){
+//        if (cX < 600){
+//            spikeTarget = 2;
+//        }
+//        else if (cX > 600 && maxArea > 5000){
+//            spikeTarget = 3;
+//        }
+//        else{
+//            spikeTarget = 1;
+//        }
+
         while (opModeIsActive())
         {
+
+//            if(spikeTarget == 0){
+//                initOpenCV();
+//            }
+
             targetFound = false;
             desiredTag  = null;
 
             telemetry.addData("Coordinate", "(" + (int) cX + ", " + (int) cY + ")");
             telemetry.addData("Distance in Inch", (getDistance(width)));
-            telemetry.update();
+            telemetry.addData("cX is equal to", cX);
+            telemetry.addData("maxArea is equal to", maxArea);
+//            telemetry.update();
+            double distance = getDistance(width);
 
-            while (getDistance(width)>1){
+//            while (distance > 10 && opModeIsActive()){
+//                moveRobot(0.3, 0, 0);
+//
+//                distance = getDistance(width);
+//
+//                telemetry.addData("Distance: %5.3f", distance);
+//                telemetry.update();
+//            }
+//            if (distance < 10){
+//                moveRobot(0,0,0);
+//            }
 
-            }
 
             if (!aprilTagInitComplete){
                 initAprilTag();
@@ -244,22 +280,24 @@ public class Autonomous_TestBlueLeft extends LinearOpMode
 
             // Step through the list of detected tags and look for a matching tag
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-            for (AprilTagDetection detection : currentDetections) {
-                // Look to see if we have size info on this tag.
-                if (detection.metadata != null) {
-                    //  Check to see if we want to track towards this tag.
-                    if ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID)) {
-                        // Yes, we want to use this tag.
-                        targetFound = true;
-                        desiredTag = detection;
-                        break;  // don't look any further.
+            if (opModeIsActive()) {
+                for (AprilTagDetection detection : currentDetections) {
+                    // Look to see if we have size info on this tag.
+                    if (detection.metadata != null) {
+                        //  Check to see if we want to track towards this tag.
+                        if ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID)) {
+                            // Yes, we want to use this tag.
+                            targetFound = true;
+                            desiredTag = detection;
+                            break;  // don't look any further.
+                        } else {
+                            // This tag is in the library, but we do not want to track it right now.
+                            telemetry.addData("Skipping", "Tag ID %d is not desired", detection.id);
+                        }
                     } else {
-                        // This tag is in the library, but we do not want to track it right now.
-                        telemetry.addData("Skipping", "Tag ID %d is not desired", detection.id);
+                        // This tag is NOT in the library, so we don't have enough information to track to it.
+                        telemetry.addData("Unknown", "Tag ID %d is not in TagLibrary", detection.id);
                     }
-                } else {
-                    // This tag is NOT in the library, so we don't have enough information to track to it.
-                    telemetry.addData("Unknown", "Tag ID %d is not in TagLibrary", detection.id);
                 }
             }
 
@@ -271,155 +309,157 @@ public class Autonomous_TestBlueLeft extends LinearOpMode
                 telemetry.addData("Yaw","%3.0f degrees", desiredTag.ftcPose.yaw);
             } else {
                 telemetry.addData("\n>","No target found\n");
-                telemetry.addData("Coordinate", "(" + (int) cX + ", " + (int) cY + ")");
-                telemetry.addData("Distance in Inch", (getDistance(width)));
-                telemetry.update();
+//                telemetry.addData("Coordinate", "(" + (int) cX + ", " + (int) cY + ")");
+//                telemetry.addData("Distance in Inch", (getDistance(width)));
+//                telemetry.update();
             }
 
-            if (order == 0) {
-                encoderDrive(0.7, 10, 10, 10);
-                order = 1;
-            }
+//            if (order == 0) {
+//                encoderDrive(0.7, 10, 10, 10);
+//                order = 1;
+//            }
+//
+//            if (order == 1) {
+//                encoderDrive(0.7, 15, -15, 10);
+//                order = 2;
+//            }
+//
+//            // If we have found the desired target, Drive to target Automatically
+//            if (targetFound && order == 2) {
+//
+//                // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
+//                double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
+//                double  headingError    = desiredTag.ftcPose.bearing;
+//                double  yawError        = desiredTag.ftcPose.yaw;
+//
+//                // Use the speed and turn "gains" to calculate how we want the robot to move.
+//                drive  = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
+//                turn   = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN) ;
+//                strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
+//
+//                telemetry.addData("Auto","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
+//            }
+//            else{
+//                drive = 0;
+//                turn = 0;
+//                strafe = 0;
+//            }
+//            // arm1 target to place pixels == -401
+//
+//            // arm2 target to place pixels == - 373
+//            // armServo target to place pixels == 0.21
+//
+//            // Apply desired axes motions to the drivetrain.
+//            moveRobot(drive, strafe, turn);
+//            sleep(10);
+//
+//            if(desiredTag!=null && desiredTag.ftcPose!=null) {
+//                if (!(rightFrontDrive.isBusy() && leftFrontDrive.isBusy()) && order == 2 &&
+//                        (desiredTag.ftcPose.range - DESIRED_DISTANCE < 1)) {
+//
+//                    telemetry.addData("\n>","Running arm movement code.\n");
+//                    armServo.setPosition(0.448);
+//
+//                    leftFrontDrive.setTargetPosition(leftFrontDrive.getCurrentPosition());
+//                    leftBackDrive.setTargetPosition(leftBackDrive.getCurrentPosition());
+//                    rightFrontDrive.setTargetPosition(rightFrontDrive.getCurrentPosition());
+//                    rightBackDrive.setTargetPosition(rightBackDrive.getCurrentPosition());
+//
+//                    leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    leftBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//                    leftBackDrive.setPower(0);
+//                    rightBackDrive.setPower(0);
+//                    leftFrontDrive.setPower(0);
+//                    rightBackDrive.setPower(0);
+//
+//                    arm1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//                    arm2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//
+//                    arm1.setTargetPosition(-297);
+//                    arm2.setTargetPosition(-339);
+//
+//                    arm1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    arm2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//                    // Add power to the arms in order for them to move!!!!
+//
+//                    arm1.setPower(0.1);
+//                    arm2.setPower(0.1);
+//
+//                    while (opModeIsActive() && arm1.isBusy() && arm2.isBusy()) {
+//                        telemetry.addLine("Moving arm");
+//                        telemetry.update();
+//                    }
+//
+//                    arm1.setPower(0);
+//                    arm2.setPower(0);
+//
+//                    sleep(1000);
+//
+//                    leftClaw.setPosition(0.15);
+//                    rightClaw.setPosition(0);
+//
+//                    sleep(1000);
+//
+//                    arm1.setTargetPosition(0);
+//                    arm2.setTargetPosition(0);
+//
+//                    arm1.setPower(0.1);
+//                    arm2.setPower(0.1);
+//
+//                    while (opModeIsActive() && arm1.isBusy() && arm2.isBusy()) {
+//                        telemetry.addLine("Moving arm");
+//                        telemetry.update();
+//                    }
+//
+//                    arm1.setPower(0);
+//                    arm2.setPower(0);
+//
+//                    arm1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    arm2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//
+//                    telemetry.addLine("Done");
+//
+//                    order = 3;
+//
+//                    leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                }
+//                else{
+//                    telemetry.addData("\n>","desiredTag or desiredTag.ftcPose is not null.\n");
+//                }
+//            }
+//            else{
+//                telemetry.addData("\n>","desiredTag or desiredTag.ftcPose is null.\n");
+//            }
+//
+//            if (order == 3) {
+//                encoderDrive(0.7, -15, 15, 10);
+//                armServo.setPosition(0);
+//                order = 4;
+//            }
+//
+//            if (order == 4){
+//                encoderDrive(0.7, 22,22,10);
+//                order = 5;
+//            }
+//
+//            if (order == 5){
+//                encoderDrive(0.7, 15, -15, 10);
+//                order = 6;
+//            }
+//
+//            if (order == 6){
+//                encoderDrive(0.7, 10, 10, 10);
+//                order = 7;
+//            }
 
-            if (order == 1) {
-                encoderDrive(0.7, 15, -15, 10);
-                order = 2;
-            }
-
-            // If we have found the desired target, Drive to target Automatically
-            if (targetFound && order == 2) {
-
-                // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
-                double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
-                double  headingError    = desiredTag.ftcPose.bearing;
-                double  yawError        = desiredTag.ftcPose.yaw;
-
-                // Use the speed and turn "gains" to calculate how we want the robot to move.
-                drive  = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-                turn   = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN) ;
-                strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
-
-                telemetry.addData("Auto","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
-            }
-            else{
-                drive = 0;
-                turn = 0;
-                strafe = 0;
-            }
-            // arm1 target to place pixels == -401
-
-            // arm2 target to place pixels == - 373
-            // armServo target to place pixels == 0.21
-
-            // Apply desired axes motions to the drivetrain.
-            moveRobot(drive, strafe, turn);
-            sleep(10);
-
-            if(desiredTag!=null && desiredTag.ftcPose!=null) {
-                if (!(rightFrontDrive.isBusy() && leftFrontDrive.isBusy()) && order == 2 &&
-                        (desiredTag.ftcPose.range - DESIRED_DISTANCE < 1)) {
-
-                    telemetry.addData("\n>","Running arm movement code.\n");
-                    armServo.setPosition(0.448);
-
-                    leftFrontDrive.setTargetPosition(leftFrontDrive.getCurrentPosition());
-                    leftBackDrive.setTargetPosition(leftBackDrive.getCurrentPosition());
-                    rightFrontDrive.setTargetPosition(rightFrontDrive.getCurrentPosition());
-                    rightBackDrive.setTargetPosition(rightBackDrive.getCurrentPosition());
-
-                    leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    leftBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-                    leftBackDrive.setPower(0);
-                    rightBackDrive.setPower(0);
-                    leftFrontDrive.setPower(0);
-                    rightBackDrive.setPower(0);
-
-                    arm1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    arm2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-                    arm1.setTargetPosition(-297);
-                    arm2.setTargetPosition(-339);
-
-                    arm1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    arm2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-                    // Add power to the arms in order for them to move!!!!
-
-                    arm1.setPower(0.1);
-                    arm2.setPower(0.1);
-
-                    while (opModeIsActive() && arm1.isBusy() && arm2.isBusy()) {
-                        telemetry.addLine("Moving arm");
-                        telemetry.update();
-                    }
-
-                    arm1.setPower(0);
-                    arm2.setPower(0);
-
-                    sleep(1000);
-
-                    leftClaw.setPosition(0.15);
-                    rightClaw.setPosition(0);
-
-                    sleep(1000);
-
-                    arm1.setTargetPosition(0);
-                    arm2.setTargetPosition(0);
-
-                    arm1.setPower(0.1);
-                    arm2.setPower(0.1);
-
-                    while (opModeIsActive() && arm1.isBusy() && arm2.isBusy()) {
-                        telemetry.addLine("Moving arm");
-                        telemetry.update();
-                    }
-
-                    arm1.setPower(0);
-                    arm2.setPower(0);
-
-                    arm1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    arm2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-                    telemetry.addLine("Done");
-
-                    order = 3;
-
-                    leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                }
-                else{
-                    telemetry.addData("\n>","desiredTag or desiredTag.ftcPose is not null.\n");
-                }
-            }
-            else{
-                telemetry.addData("\n>","desiredTag or desiredTag.ftcPose is null.\n");
-            }
-
-            if (order == 3) {
-                encoderDrive(0.7, -15, 15, 10);
-                armServo.setPosition(0);
-                order = 4;
-            }
-
-            if (order == 4){
-                encoderDrive(0.7, 22,22,10);
-                order = 5;
-            }
-
-            if (order == 5){
-                encoderDrive(0.7, 15, -15, 10);
-                order = 6;
-            }
-
-            if (order == 6){
-                encoderDrive(0.7, 10, 10, 10);
-                order = 7;
-            }
+            telemetry.addData("Spike Target", spikeTarget);
 
             telemetry.update();
         }
@@ -495,7 +535,6 @@ public class Autonomous_TestBlueLeft extends LinearOpMode
     private void initSystems(){
 
         // Create an instance of the camera
-        webcam1 = hardwareMap.get(WebcamName.class, "Webcam 1");
 
         // Trying initializing the openCV camera w/o cameraMonitorViewId
 //        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
@@ -514,7 +553,7 @@ public class Autonomous_TestBlueLeft extends LinearOpMode
 
         controlHubCam = OpenCvCameraFactory.getInstance().createWebcam(webcam1);
 
-        controlHubCam.setPipeline(new Autonomous_TestBlueLeft.YellowBlobDetectionPipeline());
+        controlHubCam.setPipeline(new Autonomous_TestRed.YellowBlobDetectionPipeline());
 
         controlHubCam.openCameraDevice();
         controlHubCam.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
@@ -658,22 +697,23 @@ public class Autonomous_TestBlueLeft extends LinearOpMode
         private void initOpenCV() {
 
         // Create an instance of the camera
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-                "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+//        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+//                "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
 
         // Use OpenCvCameraFactory class from FTC SDK to create camera instance
-        controlHubCam = OpenCvCameraFactory.getInstance().createWebcam(
-                hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        controlHubCam = OpenCvCameraFactory.getInstance().createWebcam(webcam1);
 
-        controlHubCam.setPipeline(new Autonomous_TestBlueLeft.YellowBlobDetectionPipeline());
+        controlHubCam.setPipeline(new Autonomous_TestRed.YellowBlobDetectionPipeline());
 
         controlHubCam.openCameraDevice();
         controlHubCam.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
     }
     class YellowBlobDetectionPipeline extends OpenCvPipeline {
         Mat hsvFrame = new Mat();
+//        Mat YCrCb = new Mat();
         Mat hierarchy = new Mat();
         Mat yellowMask = new Mat();
+//        Mat Cr = new Mat();
 
         @Override
         public Mat processFrame(Mat input) {
@@ -695,11 +735,13 @@ public class Autonomous_TestBlueLeft extends LinearOpMode
                 width = calculateWidth(largestContour);
 
                 // Display the width next to the label
+                String areaLabel = "Area: " + (int) maxArea + "pixels";
+                Imgproc.putText(input, areaLabel, new Point(cX + 10, cY + 40), Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(255, 255, 255), 2);
                 String widthLabel = "Width: " + (int) width + " pixels";
-                Imgproc.putText(input, widthLabel, new Point(cX + 10, cY + 20), Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 255, 0), 2);
+                Imgproc.putText(input, widthLabel, new Point(cX + 10, cY + 20), Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(255, 255, 255), 2);
                 //Display the Distance
                 String distanceLabel = "Distance: " + String.format("%.2f", getDistance(width)) + " inches";
-                Imgproc.putText(input, distanceLabel, new Point(cX + 10, cY + 60), Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 255, 0), 2);
+                Imgproc.putText(input, distanceLabel, new Point(cX + 10, cY + 60), Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(255, 255, 255), 2);
                 // Calculate the centroid of the largest contour
                 Moments moments = Imgproc.moments(largestContour);
                 cX = moments.get_m10() / moments.get_m00();
@@ -709,7 +751,15 @@ public class Autonomous_TestBlueLeft extends LinearOpMode
                 String label = "(" + (int) cX + ", " + (int) cY + ")";
                 Imgproc.putText(input, label, new Point(cX + 10, cY), Imgproc.FONT_HERSHEY_COMPLEX, 0.5, new Scalar(0, 255, 0), 2);
                 Imgproc.circle(input, new Point(cX, cY), 5, new Scalar(0, 255, 0), -1);
-
+            }
+            if ((int)cX < 600){
+                spikeTarget = 2;
+            }
+            else if ((int)maxArea > 5000){
+                spikeTarget = 3;
+            }
+            else{
+                spikeTarget = 1;
             }
 
             return input;
@@ -719,9 +769,14 @@ public class Autonomous_TestBlueLeft extends LinearOpMode
 //            Mat hsvFrame = new Mat();
             Imgproc.cvtColor(frame, hsvFrame, Imgproc.COLOR_BGR2HSV);
 
+//            Imgproc.cvtColor(frame, YCrCb, Imgproc.COLOR_BGR);
             Scalar lowerYellow = new Scalar(100, 100, 100);
             Scalar upperYellow = new Scalar(180, 255, 255);
 
+//            Scalar lowerRed = new Scalar(0, 0, 0);
+//            Scalar upperRed = new Scalar(255, 255, 255);
+
+//            Core.extractChannel(YCrCb, Cr, 2);
 
 //            Mat yellowMask = new Mat();
             Core.inRange(hsvFrame, lowerYellow, upperYellow, yellowMask);
@@ -734,8 +789,8 @@ public class Autonomous_TestBlueLeft extends LinearOpMode
         }
 
         private MatOfPoint findLargestContour(List<MatOfPoint> contours) {
-            double maxArea = 0;
             MatOfPoint largestContour = null;
+            maxArea = 0;
 
             for (MatOfPoint contour : contours) {
                 double area = Imgproc.contourArea(contour);
