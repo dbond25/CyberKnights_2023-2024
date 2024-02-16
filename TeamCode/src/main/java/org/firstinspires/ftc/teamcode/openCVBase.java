@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 //import com.acmerobotics.dashboard.FtcDashboard;
 //import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode; // no
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp; // no
 import com.qualcomm.robotcore.util.ElapsedTime; // no
@@ -23,6 +24,7 @@ import java.util.ArrayList; // done
 import java.util.List; // done
 
 @TeleOp(name = "OpenCV Testing")
+@Disabled
 
 public class openCVBase extends LinearOpMode {
 

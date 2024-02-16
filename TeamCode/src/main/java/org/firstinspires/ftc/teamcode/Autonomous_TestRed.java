@@ -101,7 +101,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class Autonomous_TestRed extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = 9; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE = 8.75; //  this is how close the camera should get to the target (inches)
 
     final double DESIRED_OFFSET = 5;
 
@@ -312,6 +312,7 @@ public class Autonomous_TestRed extends LinearOpMode
                 telemetry.addData("Yaw","%3.0f degrees", desiredTag.ftcPose.yaw);
             } else {
                 telemetry.addData("\n>","No target found\n");
+//                encoderDrive(0.5, -5, 5, 10);
 //                telemetry.addData("Coordinate", "(" + (int) cX + ", " + (int) cY + ")");
 //                telemetry.addData("Distance in Inch", (getDistance(width)));
 //                telemetry.update();
@@ -319,7 +320,7 @@ public class Autonomous_TestRed extends LinearOpMode
 
             if (order == 0){
                 if (spikeTarget == 2){
-                    encoderDrive(0.5, 24, 24, 10);
+                    encoderDrive(0.5, 23, 23, 10);
                     armServo.setPosition(1);
                     sleep(400);
                     leftClaw.setPosition(0.15);
@@ -335,17 +336,17 @@ public class Autonomous_TestRed extends LinearOpMode
                     sleep(400);
                     encoderDrive(0.5, -7, -7, 10);
                     armServo.setPosition(0);
-                    encoderDrive(0.5, 10, -10, 10);
+                    encoderDrive(0.5, 12, -12, 10);
                 }
                 if (spikeTarget == 1){
                     encoderDrive(0.5, 24, 24, 10);
-                    encoderDrive(0.5, -20, 20, 10);
-                    encoderDrive(0.5, 5,5, 10);
+                    encoderDrive(0.5, -18, 19, 10);
+                    encoderDrive(0.5, 3.25,3.25, 10);
                     leftClaw.setPosition(0.15);
                     sleep(400);
                     encoderDrive(0.5, -10, -10, 10);
                     armServo.setPosition(0);
-                    encoderDrive(0.5, -40, 40, 10);
+                    encoderDrive(0.5, -38, 38, 10);
                 }
                 order = 1;
             }
@@ -398,7 +399,7 @@ public class Autonomous_TestRed extends LinearOpMode
                     double endTime = 0;
 
                     if (spikeTarget == 2) {
-                        while (endTime - startTime < 0.45 && opModeIsActive()) {
+                        while (endTime - startTime < 0.475 && opModeIsActive()) {
                             moveRobot(0, 0.3, 0);
                             endTime = getRuntime();
                         }
@@ -406,6 +407,12 @@ public class Autonomous_TestRed extends LinearOpMode
                     if (spikeTarget == 3){
                         while (endTime - startTime < 0.25 && opModeIsActive()){
                             moveRobot(0, 0.3, 0);
+                            endTime = getRuntime();
+                        }
+                    }
+                    if (spikeTarget == 1){
+                        while (endTime - startTime < 0.225 && opModeIsActive()){
+                            moveRobot(0, 0.3, 0.01);
                             endTime = getRuntime();
                         }
                     }
@@ -509,6 +516,10 @@ public class Autonomous_TestRed extends LinearOpMode
             }
             if (order == 4 && spikeTarget == 2){
                 encoderDrive(0.7, 22,22,10);
+                order = 5;
+            }
+            if (order == 4 && spikeTarget == 1){
+                encoderDrive(0.7, 26, 26, 10);
                 order = 5;
             }
 
