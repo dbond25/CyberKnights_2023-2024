@@ -260,7 +260,7 @@ public class Red_Teleop extends LinearOpMode
                 turn   = -gamepad1.right_stick_x * 0.75;// Reduce turn rate to 33%.
                 telemetry.addData("Manual","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
             }
-            telemetry.update();
+//            telemetry.update();
 
             // Apply desired axes motions to the drivetrain.
             moveRobot(drive, strafe, turn);
@@ -442,7 +442,7 @@ public class Red_Teleop extends LinearOpMode
 
                 while (opModeIsActive() && arm1.isBusy() && arm2.isBusy()) {
                     telemetry.addLine("Moving arm");
-                    telemetry.update();
+//                    telemetry.update();
                     drive  = -gamepad1.left_stick_y * 0.75;  // Reduce drive rate to 50%.
                     strafe = -gamepad1.left_stick_x * 0.75;  // Reduce strafe rate to 50%.
                     turn   = -gamepad1.right_stick_x * 0.75;// Reduce turn rate to 33%.
