@@ -412,7 +412,7 @@ public class Autonomous_TestRed extends LinearOpMode
                     }
                     if (spikeTarget == 1){
                         while (endTime - startTime < 0.225 && opModeIsActive()){
-                            moveRobot(0, 0.3, 0.01);
+                            moveRobot(0, 0.3, 0.04);
                             endTime = getRuntime();
                         }
                     }
