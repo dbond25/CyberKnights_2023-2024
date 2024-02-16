@@ -106,7 +106,7 @@ import java.util.concurrent.TimeUnit;
 public class Autonomous_TestBlue extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = 9; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE = 8.75; //  this is how close the camera should get to the target (inches)
 
     final double DESIRED_OFFSET = 5;
 
@@ -324,7 +324,7 @@ public class Autonomous_TestBlue extends LinearOpMode
 
             if (order == 0){
                 if (spikeTarget == 2){
-                    encoderDrive(0.5, 24, 24, 10);
+                    encoderDrive(0.5, 23, 23, 10);
                     armServo.setPosition(1);
                     sleep(400);
                     leftClaw.setPosition(0.15);
@@ -333,24 +333,24 @@ public class Autonomous_TestBlue extends LinearOpMode
                     armServo.setPosition(0);
                 }
                 if (spikeTarget == 1){
-                    encoderDrive(0.5, 4, -4, 10);
+                    encoderDrive(0.5, -4, 4, 10);
                     encoderDrive(0.5, 18, 18, 10);
 //                    encoderDrive(0.5, 15, -15, 10);
                     leftClaw.setPosition(0.15);
                     sleep(400);
                     encoderDrive(0.5, -7, -7, 10);
                     armServo.setPosition(0);
-                    encoderDrive(0.5, 10, -10, 10);
+                    encoderDrive(0.5, -12, 12, 10);
                 }
                 if (spikeTarget == 3){
                     encoderDrive(0.5, 24, 24, 10);
-                    encoderDrive(0.5, -20, 20, 10);
-                    encoderDrive(0.5, 5,5, 10);
+                    encoderDrive(0.5, 19, -18, 10);
+                    encoderDrive(0.5, 3.25,3.25, 10);
                     leftClaw.setPosition(0.15);
                     sleep(400);
                     encoderDrive(0.5, -10, -10, 10);
                     armServo.setPosition(0);
-                    encoderDrive(0.5, -40, 40, 10);
+                    encoderDrive(0.5, 38, -38, 10);
                 }
                 order = 1;
             }
@@ -362,7 +362,7 @@ public class Autonomous_TestBlue extends LinearOpMode
 //
             if (order == 1) {
                 if (spikeTarget == 2) {
-                    encoderDrive(0.7, 17, -17, 10);
+                    encoderDrive(0.7, -17, 17, 10);
                 }
                 order = 2;
             }
@@ -403,7 +403,7 @@ public class Autonomous_TestBlue extends LinearOpMode
                     double endTime = 0;
 
                     if (spikeTarget == 2) {
-                        while (endTime - startTime < 0.45 && opModeIsActive()) {
+                        while (endTime - startTime < 0.475 && opModeIsActive()) {
                             moveRobot(0, 0.3, 0);
                             endTime = getRuntime();
                         }
@@ -508,7 +508,7 @@ public class Autonomous_TestBlue extends LinearOpMode
                 order = 4;
             }
 
-            if (order == 4 && spikeTarget == 3){
+            if (order == 4 && spikeTarget == 1){
                 encoderDrive(0.7, 16,16,10);
                 order = 5;
             }
@@ -516,7 +516,10 @@ public class Autonomous_TestBlue extends LinearOpMode
                 encoderDrive(0.7, 22,22,10);
                 order = 5;
             }
-
+            if (order == 4 && spikeTarget == 3){
+                encoderDrive(0.7, 26, 26, 10);
+                order = 5;
+            }
             if (order == 5){
                 encoderDrive(0.7, 15, -15, 10);
                 order = 6;
@@ -826,11 +829,11 @@ public class Autonomous_TestBlue extends LinearOpMode
             }
             else if ((int)maxArea > 5000){
                 spikeTarget = 1;
-                DESIRED_TAG_ID = 3;
+                DESIRED_TAG_ID = 1;
             }
             else{
                 spikeTarget = 3;
-                DESIRED_TAG_ID = 1;
+                DESIRED_TAG_ID = 3;
             }
 
             return input;
