@@ -29,11 +29,12 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
@@ -46,7 +47,6 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
  * This OpMode illustrates using a camera to locate and drive towards a specific AprilTag.
@@ -88,9 +88,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  *
  */
 
-@Autonomous(name="Autonomous_NearSideRed", group = "Concept")
+@Autonomous(name="Autonomous_FarSideRed", group = "Concept")
 @Disabled
-public class Autonomous_NearSideRed extends LinearOpMode
+public class Autonomous_FarSideRed_OLD extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
     final double DESIRED_DISTANCE = 16.0; //  this is how close the camera should get to the target (inches)
@@ -229,18 +229,27 @@ public class Autonomous_NearSideRed extends LinearOpMode
             }
 
             if (order == 0) {
-//                sleep(13000);
-                encoderDrive(0.7, 15, 15, 10);
+                encoderDrive(0.7, 42, 42, 10);
                 order = 1;
             }
 
             if (order == 1) {
-                encoderDrive(0.7, 16, -16, 10);
+                encoderDrive(0.7, 19, -19, 10);
+                armServo.setPosition(0.5);
+                sleep(500);
                 order = 2;
             }
 
+            if (order == 2){
+                encoderDrive(0.7, 36, 36, 10);
+                armServo.setPosition(0);
+                sleep(500);
+                encoderDrive(0.7, 7, -7, 10);
+                order = 3;
+            }
+
             // If we have found the desired target, Drive to target Automatically
-            if (targetFound && order == 2) {
+            if (targetFound && order == 3) {
 
                 // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
                 double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
@@ -259,13 +268,17 @@ public class Autonomous_NearSideRed extends LinearOpMode
                 turn = 0;
                 strafe = 0;
             }
+            // arm1 target to place pixels == -401
+
+            // arm2 target to place pixels == - 373
+            // armServo target to place pixels == 0.21
 
             // Apply desired axes motions to the drivetrain.
             moveRobot(drive, strafe, turn);
             sleep(10);
 
             if(desiredTag!=null && desiredTag.ftcPose!=null) {
-                if (!(rightFrontDrive.isBusy() && leftFrontDrive.isBusy()) && order == 2 &&
+                if (!(rightFrontDrive.isBusy() && leftFrontDrive.isBusy()) && order == 3 &&
                         (desiredTag.ftcPose.range - DESIRED_DISTANCE < 1)) {
 
                     telemetry.addData("\n>","Running arm movement code.\n");
@@ -334,7 +347,7 @@ public class Autonomous_NearSideRed extends LinearOpMode
 
                     telemetry.addLine("Done");
 
-                    order = 3;
+                    order = 4;
 
                     leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -349,25 +362,25 @@ public class Autonomous_NearSideRed extends LinearOpMode
                 telemetry.addData("\n>","desiredTag or desiredTag.ftcPose is null.\n");
             }
 
-            if (order == 3) {
+            if (order == 4) {
                 encoderDrive(0.7, 15, -15, 10);
                 armServo.setPosition(0);
-                order = 4;
-            }
-
-            if (order == 4){
-                encoderDrive(0.7, 22,22,10);
                 order = 5;
             }
 
             if (order == 5){
-                encoderDrive(0.7, -15, 15, 10);
+                encoderDrive(0.7, 22,22,10);
                 order = 6;
             }
 
             if (order == 6){
-                encoderDrive(0.7, 10, 10, 10);
+                encoderDrive(0.7, -15, 15, 10);
                 order = 7;
+            }
+
+            if (order == 7){
+                encoderDrive(0.7, 10, 10, 10);
+                order = 8;
             }
 
             telemetry.update();

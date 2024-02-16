@@ -29,11 +29,11 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
@@ -46,6 +46,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
  * This OpMode illustrates using a camera to locate and drive towards a specific AprilTag.
@@ -87,9 +88,9 @@ import java.util.concurrent.TimeUnit;
  *
  */
 
-@Autonomous(name="Autonomous_FarSideRed", group = "Concept")
-//@Disabled
-public class Autonomous_FarSideRed extends LinearOpMode
+@Autonomous(name="Autonomous_NearSideBlue", group = "Concept")
+@Disabled
+public class Autonomous_NearSideBlue_OLD extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
     final double DESIRED_DISTANCE = 16.0; //  this is how close the camera should get to the target (inches)
@@ -101,8 +102,8 @@ public class Autonomous_FarSideRed extends LinearOpMode
     final double STRAFE_GAIN =  0.015 ;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
     final double TURN_GAIN   =  0.01  ;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
 
-    final double MAX_AUTO_SPEED = 0.3;   //  Clip the approach speed to this max value (adjust for your robot)
-    final double MAX_AUTO_STRAFE= 0.3;   //  Clip the approach speed to this max value (adjust for your robot)
+    final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
+    final double MAX_AUTO_STRAFE= 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
     final double MAX_AUTO_TURN  = 0.3;   //  Clip the turn speed to this max value (adjust for your robot)
 
     private DcMotor leftFrontDrive   = null;  //  Used to control the left front drive wheel
@@ -117,7 +118,7 @@ public class Autonomous_FarSideRed extends LinearOpMode
 
 
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
-    private static final int DESIRED_TAG_ID = 5;     // Choose the tag you want to approach or set to -1 for ANY tag.
+    private static final int DESIRED_TAG_ID = 2;     // Choose the tag you want to approach or set to -1 for ANY tag.
     private VisionPortal visionPortal;               // Used to manage the video source.
     private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
     private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
@@ -130,7 +131,7 @@ public class Autonomous_FarSideRed extends LinearOpMode
     // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
     static final double     COUNTS_PER_MOTOR_REV    = 28 ;    // eg: TETRIX Motor Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 20 ;     // No External Gearing.
-    static final double     WHEEL_DIAMETER_INCHES   = 3.77;     // For figuring circumference
+    static final double     WHEEL_DIAMETER_INCHES   = 3.77 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double     DRIVE_SPEED             = 0.6;
@@ -138,8 +139,10 @@ public class Autonomous_FarSideRed extends LinearOpMode
     private ElapsedTime     runtime = new ElapsedTime();
     private double order = 0;
 
+
     @Override public void runOpMode()
     {
+
         boolean targetFound     = false;    // Set to true when an AprilTag target is detected
         double  drive           = 0;        // Desired forward power/speed (-1 to +1)
         double  strafe          = 0;        // Desired strafe power/speed (-1 to +1)
@@ -157,9 +160,9 @@ public class Autonomous_FarSideRed extends LinearOpMode
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
         arm1 = hardwareMap.get(DcMotor.class, "arm1");
         arm2 = hardwareMap.get(DcMotor.class, "arm2");
-        // Right claw open position == 0.7, closed position == 1
-        // Left claw open position == 0.15, closed position == 0
-        // Arm servo raised position == 0, drop position ~= 0.11, down position == 0.6
+//        // Right claw open position == 0.7, closed position == 1
+//        // Left claw open position == 0.15, closed position == 0
+//        // Arm servo raised position == 0, drop position ~= 0.11, down position == 0.6
         armServo = hardwareMap.get(Servo.class, "armServo");
         leftClaw = hardwareMap.get(Servo.class, "leftClaw");
         rightClaw = hardwareMap.get(Servo.class, "rightClaw");
@@ -191,12 +194,14 @@ public class Autonomous_FarSideRed extends LinearOpMode
         telemetry.update();
         waitForStart();
 
+        telemetry.addLine("Outside While Loop...");
+        int counter = 0;
         while (opModeIsActive())
         {
             targetFound = false;
             desiredTag  = null;
-
-            // Step through the list of detected tags and look for a matching tag
+            telemetry.addLine("Starting while loop..." + counter);
+//             Step through the list of detected tags and look for a matching tag
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             for (AprilTagDetection detection : currentDetections) {
                 // Look to see if we have size info on this tag.
@@ -228,28 +233,18 @@ public class Autonomous_FarSideRed extends LinearOpMode
             }
 
             if (order == 0) {
-                encoderDrive(0.7, 42, 42, 10);
+                encoderDrive(0.7, 15, 15, 10);
                 order = 1;
             }
 
             if (order == 1) {
-                encoderDrive(0.7, 19, -19, 10);
-                armServo.setPosition(0.5);
-                sleep(500);
+                encoderDrive(0.7, -17, 17, 10);
                 order = 2;
             }
 
-            if (order == 2){
-                encoderDrive(0.7, 36, 36, 10);
-                armServo.setPosition(0);
-                sleep(500);
-                encoderDrive(0.7, 7, -7, 10);
-                order = 3;
-            }
-
             // If we have found the desired target, Drive to target Automatically
-            if (targetFound && order == 3) {
-
+            if (targetFound && order == 2) {
+//            if(targetFound){
                 // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
                 double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
                 double  headingError    = desiredTag.ftcPose.bearing;
@@ -277,11 +272,11 @@ public class Autonomous_FarSideRed extends LinearOpMode
             sleep(10);
 
             if(desiredTag!=null && desiredTag.ftcPose!=null) {
-                if (!(rightFrontDrive.isBusy() && leftFrontDrive.isBusy()) && order == 3 &&
+                if (!(rightFrontDrive.isBusy() && leftFrontDrive.isBusy()) && order == 2 &&
                         (desiredTag.ftcPose.range - DESIRED_DISTANCE < 1)) {
 
                     telemetry.addData("\n>","Running arm movement code.\n");
-                    armServo.setPosition(0.428);
+                    armServo.setPosition(0.448);
 
                     leftFrontDrive.setTargetPosition(leftFrontDrive.getCurrentPosition());
                     leftBackDrive.setTargetPosition(leftBackDrive.getCurrentPosition());
@@ -346,7 +341,7 @@ public class Autonomous_FarSideRed extends LinearOpMode
 
                     telemetry.addLine("Done");
 
-                    order = 4;
+                    order = 3;
 
                     leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -361,29 +356,31 @@ public class Autonomous_FarSideRed extends LinearOpMode
                 telemetry.addData("\n>","desiredTag or desiredTag.ftcPose is null.\n");
             }
 
-            if (order == 4) {
-                encoderDrive(0.7, 15, -15, 10);
+            if (order == 3) {
+                encoderDrive(0.7, -15, 15, 10);
                 armServo.setPosition(0);
+                order = 4;
+            }
+
+            if (order == 4){
+                encoderDrive(0.7, 22,22,10);
                 order = 5;
             }
 
             if (order == 5){
-                encoderDrive(0.7, 22,22,10);
+                encoderDrive(0.7, 15, -15, 10);
                 order = 6;
             }
 
             if (order == 6){
-                encoderDrive(0.7, -15, 15, 10);
+                encoderDrive(0.7, 10, 10, 10);
                 order = 7;
             }
-
-            if (order == 7){
-                encoderDrive(0.7, 10, 10, 10);
-                order = 8;
-            }
-
+            telemetry.addLine("Finishing while loop..."+ counter);
+            counter ++;
             telemetry.update();
         }
+
     }
 
     /**
@@ -451,6 +448,7 @@ public class Autonomous_FarSideRed extends LinearOpMode
         }
     }
 
+
     /*
      Manually set the camera gain and exposure.
      This can only be called AFTER calling initAprilTag(), and only works for Webcams;
@@ -498,6 +496,11 @@ public class Autonomous_FarSideRed extends LinearOpMode
         int newLeftBackTarget;
         int newRightBackTarget;
 
+        leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         // Ensure that the OpMode is still active
         if (opModeIsActive()) {
 
@@ -533,15 +536,29 @@ public class Autonomous_FarSideRed extends LinearOpMode
             // onto the next step, use (isBusy() || isBusy()) in the loop test.
             while (opModeIsActive() &&
                     (runtime.seconds() < timeoutS) &&
-                    (leftFrontDrive.isBusy() && rightFrontDrive.isBusy())) {
+                    (leftFrontDrive.isBusy() && rightFrontDrive.isBusy() &&
+                            leftBackDrive.isBusy() && rightBackDrive.isBusy())) {
 
+//                leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+//                leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
+//                rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+//                rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+//                arm1.setDirection(DcMotor.Direction.REVERSE);
+//                arm2.setDirection(DcMotor.Direction.FORWARD);
                 // Display it for the driver.
-                telemetry.addData("Running to",  " %7d :%7d", newLeftFrontTarget,  newRightFrontTarget, newLeftBackTarget, newRightBackTarget);
-                telemetry.addData("Currently at",  " at %7d :%7d",
+                telemetry.addData("Power of motors", " %7.3f :%7.3f :%7.3f :%7.3f", leftFrontDrive.getPower(), rightFrontDrive.getPower(),
+                        leftBackDrive.getPower(), rightBackDrive.getPower());
+                telemetry.addLine("Direction of motors" + leftFrontDrive.getDirection().toString() +" :" + rightFrontDrive.getDirection().toString() +
+                        " :" + leftBackDrive.getDirection().toString() + " :" +rightBackDrive.getDirection().toString());
+                telemetry.addData("Running to",  " %7d :%7d :%7d :%7d", newLeftFrontTarget,  newRightFrontTarget, newLeftBackTarget, newRightBackTarget);
+                telemetry.addData("Currently at",  " at %7d :%7d :%7d :%7d",
                         leftFrontDrive.getCurrentPosition(), rightFrontDrive.getCurrentPosition(), leftBackDrive.getCurrentPosition(),
                         rightBackDrive.getCurrentPosition());
                 telemetry.update();
             }
+
+            telemetry.addData("Update", "......Out of while loop......");
+            telemetry.update();
 
             // Stop all motion;
             leftFrontDrive.setPower(0);
@@ -558,4 +575,8 @@ public class Autonomous_FarSideRed extends LinearOpMode
             sleep(250);   // optional pause after each move.
         }
     }
+
 }
+
+// .;l;llm ml.,;,l,l,kkpp,p,klpmk,pk,l;k,llkklkklkllkklklklklklklklklklklklklklklklkllkklklklklklklklkllklkkllkklklklklklklklklkllkklkllkklklkllklkklkllklkkllklkklklkllkkllklklklklklkkklklklklklklklklklklklklklklklklklklklkklklklkllklklkllklklkkkk0kkkkkkkkkkkkkkkkkk44444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444488888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666
+// By Alli

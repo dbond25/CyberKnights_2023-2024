@@ -96,12 +96,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  *
  */
 
-@Autonomous(name="Autonomous_TestRed", group = "Concept")
+@Autonomous(name="NearRed", group = "Concept")
 //@Disabled
-public class Autonomous_TestRed extends LinearOpMode
+public class Autonomous_NearRed extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = 8.75; //  this is how close the camera should get to the target (inches)
+    double DESIRED_DISTANCE = 9; //  this is how close the camera should get to the target (inches)
 
     final double DESIRED_OFFSET = 5;
 
@@ -320,7 +320,7 @@ public class Autonomous_TestRed extends LinearOpMode
 
             if (order == 0){
                 if (spikeTarget == 2){
-                    encoderDrive(0.5, 23, 23, 10);
+                    encoderDrive(0.5, 23.5, 23.5, 10);
                     armServo.setPosition(1);
                     sleep(400);
                     leftClaw.setPosition(0.15);
@@ -341,12 +341,13 @@ public class Autonomous_TestRed extends LinearOpMode
                 if (spikeTarget == 1){
                     encoderDrive(0.5, 24, 24, 10);
                     encoderDrive(0.5, -18, 18, 10);
-                    encoderDrive(0.5, 3.25,3.25, 10);
+                    encoderDrive(0.5, 3.5,3.5, 10);
                     leftClaw.setPosition(0.15);
                     sleep(400);
                     encoderDrive(0.5, -10, -10, 10);
                     armServo.setPosition(0);
-                    encoderDrive(0.5, -38, 38, 10);
+                    encoderDrive(0.5, -39, 39, 10);
+                    DESIRED_DISTANCE = 8.75;
                 }
                 order = 1;
             }
@@ -405,14 +406,14 @@ public class Autonomous_TestRed extends LinearOpMode
                         }
                     }
                     if (spikeTarget == 3){
-                        while (endTime - startTime < 0.25 && opModeIsActive()){
+                        while (endTime - startTime < 0.4 && opModeIsActive()){
                             moveRobot(0, 0.3, 0);
                             endTime = getRuntime();
                         }
                     }
                     if (spikeTarget == 1){
                         while (endTime - startTime < 0.225 && opModeIsActive()){
-                            moveRobot(0, 0.3, 0.04);
+                            moveRobot(0, 0.3, 0.1);
                             endTime = getRuntime();
                         }
                     }
@@ -627,7 +628,7 @@ public class Autonomous_TestRed extends LinearOpMode
 
         controlHubCam = OpenCvCameraFactory.getInstance().createWebcam(webcam1);
 
-        controlHubCam.setPipeline(new Autonomous_TestRed.YellowBlobDetectionPipeline());
+        controlHubCam.setPipeline(new Autonomous_NearRed.YellowBlobDetectionPipeline());
 
         controlHubCam.openCameraDevice();
         controlHubCam.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
@@ -777,7 +778,7 @@ public class Autonomous_TestRed extends LinearOpMode
         // Use OpenCvCameraFactory class from FTC SDK to create camera instance
         controlHubCam = OpenCvCameraFactory.getInstance().createWebcam(webcam1);
 
-        controlHubCam.setPipeline(new Autonomous_TestRed.YellowBlobDetectionPipeline());
+        controlHubCam.setPipeline(new Autonomous_NearRed.YellowBlobDetectionPipeline());
 
         controlHubCam.openCameraDevice();
         controlHubCam.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
@@ -826,11 +827,12 @@ public class Autonomous_TestRed extends LinearOpMode
                 Imgproc.putText(input, label, new Point(cX + 10, cY), Imgproc.FONT_HERSHEY_COMPLEX, 0.5, new Scalar(0, 255, 0), 2);
                 Imgproc.circle(input, new Point(cX, cY), 5, new Scalar(0, 255, 0), -1);
             }
-             if ((int)cX < 600){
+             if ((int)cX < 600 && (int) maxArea > 7500){
                 spikeTarget = 2;
                 DESIRED_TAG_ID = 5;
             }
-            else if ((int)maxArea > 5000){
+            else if ((int)maxArea > 7500
+             ){
                 spikeTarget = 3;
                 DESIRED_TAG_ID = 6;
             }
