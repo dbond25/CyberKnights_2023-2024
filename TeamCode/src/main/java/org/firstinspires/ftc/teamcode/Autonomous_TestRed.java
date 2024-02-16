@@ -340,7 +340,7 @@ public class Autonomous_TestRed extends LinearOpMode
                 }
                 if (spikeTarget == 1){
                     encoderDrive(0.5, 24, 24, 10);
-                    encoderDrive(0.5, -18, 19, 10);
+                    encoderDrive(0.5, -18, 18, 10);
                     encoderDrive(0.5, 3.25,3.25, 10);
                     leftClaw.setPosition(0.15);
                     sleep(400);
@@ -826,7 +826,7 @@ public class Autonomous_TestRed extends LinearOpMode
                 Imgproc.putText(input, label, new Point(cX + 10, cY), Imgproc.FONT_HERSHEY_COMPLEX, 0.5, new Scalar(0, 255, 0), 2);
                 Imgproc.circle(input, new Point(cX, cY), 5, new Scalar(0, 255, 0), -1);
             }
-            if ((int)cX < 600){
+             if ((int)cX < 600){
                 spikeTarget = 2;
                 DESIRED_TAG_ID = 5;
             }
