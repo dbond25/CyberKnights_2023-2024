@@ -335,11 +335,7 @@ public class Autonomous_FarRed extends LinearOpMode
                     sleep(400);
                     encoderDrive(0.5, 20, 20, 10);
                     sleep(400);
-                    encoderDrive(0.5, 18,-18,10);
-                    encoderDrive(0.5, 55, 55, 10);
-                    sleep(400);
-                    armServo.setPosition(0);
-                    encoderDrive(0.5, 10, -10, 10);
+
                 }
                 if (spikeTarget == 1){
                     encoderDrive(0.5, -3, 3, 10);
@@ -352,11 +348,7 @@ public class Autonomous_FarRed extends LinearOpMode
                     sleep(400);
                     encoderDrive(0.5, 42, 42, 10);
                     sleep(400);
-                    encoderDrive(0.5, 18,-18,10);
-                    encoderDrive(0.5, 55, 55, 10);
-                    sleep(400);
-                    armServo.setPosition(0);
-                    encoderDrive(0.5, 10, -10, 10);
+
 
                 }
                 if (spikeTarget == 3){
@@ -374,13 +366,9 @@ public class Autonomous_FarRed extends LinearOpMode
                     sleep(400);
                     encoderDrive(0.5, 20, 20, 10);
                     sleep(400);
-                    encoderDrive(0.5, 18,-18,10);
-                    encoderDrive(0.5, 55, 55, 10);
-                    sleep(400);
-                    armServo.setPosition(0);
-                    encoderDrive(0.5, 10, -10, 10);
+
                 }
-                order = 2;
+                order = 1;
             }
 
 //            if (order == 0) {
@@ -388,13 +376,17 @@ public class Autonomous_FarRed extends LinearOpMode
 //                order = 1;
 //            }
 //
-//            if (order == 1) {
-//                if (spikeTarget == 2) {
-//                    encoderDrive(0.7, 18, -18, 10);
-//                    encoderDrive(0.5, 36, 36, 10);
-//                }
-//                order = 2;
-//            }
+            if (order == 1) {
+                encoderDrive(0.5, 18,-18,10);
+                encoderDrive(0.5, 53, 53, 10);
+                sleep(400);
+                armServo.setPosition(0);
+                encoderDrive(0.5, 18, -18, 10);
+                sleep(400);
+                encoderDrive(0.5, 15, 15, 10);
+                encoderDrive(0.5, -18, 18, 10);
+                order = 2;
+            }
 
             // If we have found the desired target, Drive to target Automatically
             if (targetFound && order == 2) {
