@@ -346,10 +346,10 @@ public class Autonomous_FarRed extends LinearOpMode
                     armServo.setPosition(1);
                     sleep(400);
                     encoderDrive(0.5, 18, -18, 10);
-                    encoderDrive(0.5, 6.16, 6.16, 10);
+                    encoderDrive(0.5, 4, 4, 10);
                     leftClaw.setPosition(0.15);
                     sleep(400);
-                    encoderDrive(0.5, -6.16,-6.16,10);
+                    encoderDrive(0.5, -4,-4,10);
                     sleep(400);
                     encoderDrive(0.5, -18, 18, 10);
                     armServo.setPosition(0.5);
@@ -368,10 +368,10 @@ public class Autonomous_FarRed extends LinearOpMode
                     sleep(400);
                     encoderDrive(0.5, 18, -18, 10);
                     sleep(400);
-                    encoderDrive(0.5, 8.84,8.84, 10);
+                    encoderDrive(0.5, 8,8, 10);
                     leftClaw.setPosition(0.15);
                     sleep(400);
-                    encoderDrive(0.5, -8.84, -8.84, 10);
+                    encoderDrive(0.5, -8, -8, 10);
                     sleep(400);
                     encoderDrive(0.5, -18, 18, 10);
                     encoderDrive(0.5, -18, 18, 10);
