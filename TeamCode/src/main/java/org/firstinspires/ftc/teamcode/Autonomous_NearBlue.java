@@ -324,7 +324,7 @@ public class Autonomous_NearBlue extends LinearOpMode
 
             if (order == 0){
                 if (spikeTarget == 2){
-                    encoderDrive(0.5, 23, 23, 10);
+                    encoderDrive(0.5, 25, 25, 10);
                     armServo.setPosition(1);
                     sleep(400);
                     leftClaw.setPosition(0.15);
