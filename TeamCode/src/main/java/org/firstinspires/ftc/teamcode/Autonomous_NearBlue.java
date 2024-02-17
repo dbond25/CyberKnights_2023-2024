@@ -225,7 +225,7 @@ public class Autonomous_NearBlue extends LinearOpMode
         leftClaw.setPosition(0);
         rightClaw.setPosition(0.53);
         sleep(250);
-        armServo.setPosition(1);
+//        armServo.setPosition(1);
 
         if (USE_WEBCAM)
             setManualExposure(1, 250);  // Use low exposure time to reduce motion blur
@@ -323,6 +323,8 @@ public class Autonomous_NearBlue extends LinearOpMode
             }
 
             if (order == 0){
+                armServo.setPosition(1);
+                sleep(400);
                 if (spikeTarget == 2){
                     encoderDrive(0.5, 25, 25, 10);
                     armServo.setPosition(1);

@@ -337,21 +337,21 @@ public class Blue_Teleop extends LinearOpMode
                     strafe = -gamepad1.left_stick_x * 0.75;  // Reduce strafe rate to 50%.
                     turn   = -gamepad1.right_stick_x * 0.75;// Reduce turn rate to 33%.
                     moveRobot(drive,strafe,turn);
-//                    if (gamepad2.left_trigger != 0)
-//                    {
-//                        leftClaw.setPosition(0.15);
-//                    }
-//                    if (gamepad2.left_bumper){
-//                        leftClaw.setPosition(0);
-//                    }
-//
-//                    if (gamepad2.right_trigger != 0)
-//                    {
-//                        rightClaw.setPosition(0);
-//                    }
-//                    if (gamepad2.right_bumper){
-//                        rightClaw.setPosition(0.53);
-//                    }
+                    if (gamepad2.left_trigger != 0)
+                    {
+                        leftClaw.setPosition(0.15);
+                    }
+                    if (gamepad2.left_bumper){
+                        leftClaw.setPosition(0);
+                    }
+
+                    if (gamepad2.right_trigger != 0)
+                    {
+                        rightClaw.setPosition(0);
+                    }
+                    if (gamepad2.right_bumper){
+                        rightClaw.setPosition(0.53);
+                    }
                 }
 
                 arm1.setPower(0);

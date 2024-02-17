@@ -225,7 +225,7 @@ public class Autonomous_FarBlue extends LinearOpMode
         leftClaw.setPosition(0);
         rightClaw.setPosition(0.53);
         sleep(250);
-        armServo.setPosition(1);
+//        armServo.setPosition(1);
 
         if (USE_WEBCAM)
             setManualExposure(1, 250);  // Use low exposure time to reduce motion blur
@@ -323,8 +323,10 @@ public class Autonomous_FarBlue extends LinearOpMode
             }
 
             if (order == 0){
+                armServo.setPosition(1);
+                sleep(10000);
                 if (spikeTarget == 2){
-                    encoderDrive(0.5, 25, 25, 10);
+                    encoderDrive(0.5, 23.5, 23.5, 10);
                     armServo.setPosition(1);
                     sleep(400);
                     leftClaw.setPosition(0.15);
@@ -333,13 +335,13 @@ public class Autonomous_FarBlue extends LinearOpMode
                     sleep(400);
                     armServo.setPosition(0.5);
                     sleep(400);
-                    encoderDrive(0.5, 20, 20, 10);
+                    encoderDrive(0.5, 22, 22, 10);
                     sleep(400);
-                    encoderDrive(0.5, -18,18,10);
-                    encoderDrive(0.5, 55, 55, 10);
-                    sleep(400);
-                    armServo.setPosition(0);
-                    encoderDrive(0.5, -10, 10, 10);
+//                    encoderDrive(0.5, -18,18,10);
+//                    encoderDrive(0.5, 55, 55, 10);
+//                    sleep(400);
+//                    armServo.setPosition(0);
+//                    encoderDrive(0.5, -10, 10, 10);
                 }
                 if (spikeTarget == 1){
                     encoderDrive(0.5, 24, 24, 10);
@@ -356,11 +358,11 @@ public class Autonomous_FarBlue extends LinearOpMode
                     sleep(400);
                     encoderDrive(0.5, 20, 20, 10);
                     sleep(400);
-                    encoderDrive(0.5, -18,18,10);
-                    encoderDrive(0.5, 55, 55, 10);
-                    sleep(400);
-                    armServo.setPosition(0);
-                    encoderDrive(0.5, -10, 10, 10);
+//                    encoderDrive(0.5, -18,18,10);
+//                    encoderDrive(0.5, 55, 55, 10);
+//                    sleep(400);
+//                    armServo.setPosition(0);
+//                    encoderDrive(0.5, -10, 10, 10);
                 }
                 if (spikeTarget == 3){
                     encoderDrive(0.5, 5, -5, 10);
@@ -373,13 +375,13 @@ public class Autonomous_FarBlue extends LinearOpMode
                     sleep(400);
                     encoderDrive(0.5, 44,44, 10);
                     sleep(400);
-                    encoderDrive(0.5, -17,17,10);
-                    encoderDrive(0.5, 55, 55, 10);
-                    sleep(400);
-                    armServo.setPosition(0);
-                    encoderDrive(0.5, -10, 10, 10);
+//                    encoderDrive(0.5, -18,18,10);
+//                    encoderDrive(0.5, 55, 55, 10);
+//                    sleep(400);
+//                    armServo.setPosition(0);
+//                    encoderDrive(0.5, -10, 10, 10);
                 }
-                order = 2;
+                order = 1;
             }
 
 //            if (order == 0) {
@@ -388,6 +390,17 @@ public class Autonomous_FarBlue extends LinearOpMode
 //            }
 //
 
+            if (order == 1){
+                encoderDrive(0.5, -19,19,10);
+                encoderDrive(0.5, 67, 67, 10);
+                sleep(400);
+                armServo.setPosition(0);
+                encoderDrive(0.5, -19, 19, 10);
+                sleep(400);
+                encoderDrive(0.5, 22, 22, 10);
+                encoderDrive(0.5, 18, -18, 10);
+                order = 2;
+            }
 
             // If we have found the desired target, Drive to target Automatically
             if (targetFound && order == 2) {
@@ -424,21 +437,21 @@ public class Autonomous_FarBlue extends LinearOpMode
                     double startTime = getRuntime();
                     double endTime = 0;
 
-                    if (spikeTarget == 2) {
-                        while (endTime - startTime < 0.475 && opModeIsActive()) {
-                            moveRobot(0, 0.3, 0);
-                            endTime = getRuntime();
-                        }
-                    }
-                    if (spikeTarget == 1){
-                        while (endTime - startTime < 0.4 && opModeIsActive()){
-                            moveRobot(0, 0.3, 0.04);
-                            endTime = getRuntime();
-                        }
-                    }
+//                    if (spikeTarget == 2) {
+//                        while (endTime - startTime < 0.475 && opModeIsActive()) {
+//                            moveRobot(0, 0.3, 0);
+//                            endTime = getRuntime();
+//                        }
+//                    }
+//                    if (spikeTarget == 1){
+//                        while (endTime - startTime < 0.4 && opModeIsActive()){
+//                            moveRobot(0, 0.3, 0.04);
+//                            endTime = getRuntime();
+//                        }
+//                    }
                     if (spikeTarget == 3){
-                        while (endTime - startTime < 0.225 && opModeIsActive()){
-                            moveRobot(0, 0.3, 0);
+                        while (endTime - startTime < 0.25 && opModeIsActive()){
+                            moveRobot(0, -0.3, 0);
                             endTime = getRuntime();
                         }
                     }
@@ -531,7 +544,7 @@ public class Autonomous_FarBlue extends LinearOpMode
 
             if (order == 3) {
                 encoderDrive(0.5, -5, -5, 10);
-                encoderDrive(0.7, 15, -15, 10);
+                encoderDrive(0.7, -15, 15, 10);
                 armServo.setPosition(0);
                 order = 4;
             }
@@ -549,7 +562,7 @@ public class Autonomous_FarBlue extends LinearOpMode
                 order = 5;
             }
             if (order == 5){
-                encoderDrive(0.7, -18, 18, 10);
+                encoderDrive(0.7, 18, -18, 10);
                 order = 6;
             }
 
