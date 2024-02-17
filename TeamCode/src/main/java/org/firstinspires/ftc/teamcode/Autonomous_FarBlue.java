@@ -101,9 +101,9 @@ import java.util.concurrent.TimeUnit;
  *
  */
 
-@Autonomous(name="FarRed", group = "Concept")
+@Autonomous(name="FarBlue", group = "Concept")
 //@Disabled
-public class Autonomous_FarRed extends LinearOpMode
+public class Autonomous_FarBlue extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
     final double DESIRED_DISTANCE = 8.8; //  this is how close the camera should get to the target (inches)
@@ -335,13 +335,34 @@ public class Autonomous_FarRed extends LinearOpMode
                     sleep(400);
                     encoderDrive(0.5, 20, 20, 10);
                     sleep(400);
-                    encoderDrive(0.5, 18,-18,10);
+                    encoderDrive(0.5, -18,18,10);
                     encoderDrive(0.5, 55, 55, 10);
                     sleep(400);
                     armServo.setPosition(0);
-                    encoderDrive(0.5, 10, -10, 10);
+                    encoderDrive(0.5, -10, 10, 10);
                 }
                 if (spikeTarget == 1){
+                    encoderDrive(0.5, 24, 24, 10);
+                    sleep(400);
+                    encoderDrive(0.5, -18, 18, 10);
+                    sleep(400);
+                    encoderDrive(0.5, 8.84,8.84, 10);
+                    leftClaw.setPosition(0.15);
+                    sleep(400);
+                    encoderDrive(0.5, -8.84, -8.84, 10);
+                    sleep(400);
+                    encoderDrive(0.5, 18, -18, 10);
+                    armServo.setPosition(0.5);
+                    sleep(400);
+                    encoderDrive(0.5, 23, 23, 10);
+                    sleep(400);
+                    encoderDrive(0.5, -18,18,10);
+                    encoderDrive(0.5, 55, 55, 10);
+                    sleep(400);
+                    armServo.setPosition(0);
+                    encoderDrive(0.5, -10, 10, 10);
+                }
+                if (spikeTarget == 3){
                     encoderDrive(0.5, 18, 18, 10);
                     armServo.setPosition(1);
                     sleep(400);
@@ -351,29 +372,6 @@ public class Autonomous_FarRed extends LinearOpMode
                     sleep(400);
                     encoderDrive(0.5, -6.16,-6.16,10);
                     sleep(400);
-                    encoderDrive(0.5, -18, 18, 10);
-                    armServo.setPosition(0.5);
-                    sleep(400);
-                    encoderDrive(0.5, 23, 23, 10);
-                    sleep(400);
-                    encoderDrive(0.5, 18,-18,10);
-                    encoderDrive(0.5, 55, 55, 10);
-                    sleep(400);
-                    armServo.setPosition(0);
-                    encoderDrive(0.5, 10, -10, 10);
-
-                }
-                if (spikeTarget == 3){
-                    encoderDrive(0.5, 24, 24, 10);
-                    sleep(400);
-                    encoderDrive(0.5, 18, -18, 10);
-                    sleep(400);
-                    encoderDrive(0.5, 8.84,8.84, 10);
-                    leftClaw.setPosition(0.15);
-                    sleep(400);
-                    encoderDrive(0.5, -8.84, -8.84, 10);
-                    sleep(400);
-                    encoderDrive(0.5, -18, 18, 10);
                     encoderDrive(0.5, -18, 18, 10);
                     armServo.setPosition(0.5);
                     sleep(400);
@@ -664,7 +662,7 @@ public class Autonomous_FarRed extends LinearOpMode
 
         controlHubCam = OpenCvCameraFactory.getInstance().createWebcam(webcam1);
 
-        controlHubCam.setPipeline(new Autonomous_FarRed.YellowBlobDetectionPipeline());
+        controlHubCam.setPipeline(new Autonomous_FarBlue.YellowBlobDetectionPipeline());
 
         controlHubCam.openCameraDevice();
         controlHubCam.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
@@ -814,7 +812,7 @@ public class Autonomous_FarRed extends LinearOpMode
         // Use OpenCvCameraFactory class from FTC SDK to create camera instance
         controlHubCam = OpenCvCameraFactory.getInstance().createWebcam(webcam1);
 
-        controlHubCam.setPipeline(new Autonomous_FarRed.YellowBlobDetectionPipeline());
+        controlHubCam.setPipeline(new Autonomous_FarBlue.YellowBlobDetectionPipeline());
 
         controlHubCam.openCameraDevice();
         controlHubCam.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
@@ -884,8 +882,8 @@ public class Autonomous_FarRed extends LinearOpMode
             Imgproc.cvtColor(frame, hsvFrame, Imgproc.COLOR_BGR2HSV);
 
 //            Imgproc.cvtColor(frame, YCrCb, Imgproc.COLOR_BGR);
-            Scalar lowerYellow = new Scalar(100, 100, 100);
-            Scalar upperYellow = new Scalar(180, 255, 255);
+            Scalar lowerYellow = new Scalar(0, 100, 100);
+            Scalar upperYellow = new Scalar(120, 255, 255);
 
 //            Scalar lowerRed = new Scalar(0, 0, 0);
 //            Scalar upperRed = new Scalar(255, 255, 255);
