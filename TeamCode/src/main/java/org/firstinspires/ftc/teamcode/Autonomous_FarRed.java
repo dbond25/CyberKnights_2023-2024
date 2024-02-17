@@ -335,11 +335,7 @@ public class Autonomous_FarRed extends LinearOpMode
                     sleep(400);
                     encoderDrive(0.5, 20, 20, 10);
                     sleep(400);
-                    encoderDrive(0.5, 18,-18,10);
-                    encoderDrive(0.5, 55, 55, 10);
-                    sleep(400);
-                    armServo.setPosition(0);
-                    encoderDrive(0.5, 10, -10, 10);
+
                 }
                 if (spikeTarget == 1){
                     encoderDrive(0.5, -3, 3, 10);
@@ -350,13 +346,9 @@ public class Autonomous_FarRed extends LinearOpMode
                     encoderDrive(0.5, 3, -3, 10);
                     armServo.setPosition(0.5);
                     sleep(400);
-                    encoderDrive(0.5, 44, 44, 10);
+                    encoderDrive(0.5, 42, 42, 10);
                     sleep(400);
-                    encoderDrive(0.5, 17,-17,10);
-                    encoderDrive(0.5, 55, 55, 10);
-                    sleep(400);
-                    armServo.setPosition(0);
-                    encoderDrive(0.5, 10, -10, 10);
+
 
                 }
                 if (spikeTarget == 3){
@@ -374,13 +366,9 @@ public class Autonomous_FarRed extends LinearOpMode
                     sleep(400);
                     encoderDrive(0.5, 20, 20, 10);
                     sleep(400);
-                    encoderDrive(0.5, 18,-18,10);
-                    encoderDrive(0.5, 55, 55, 10);
-                    sleep(400);
-                    armServo.setPosition(0);
-                    encoderDrive(0.5, 10, -10, 10);
+
                 }
-                order = 2;
+                order = 1;
             }
 
 //            if (order == 0) {
@@ -388,13 +376,17 @@ public class Autonomous_FarRed extends LinearOpMode
 //                order = 1;
 //            }
 //
-//            if (order == 1) {
-//                if (spikeTarget == 2) {
-//                    encoderDrive(0.7, 18, -18, 10);
-//                    encoderDrive(0.5, 36, 36, 10);
-//                }
-//                order = 2;
-//            }
+            if (order == 1) {
+                encoderDrive(0.5, 18,-18,10);
+                encoderDrive(0.5, 53, 53, 10);
+                sleep(400);
+                armServo.setPosition(0);
+                encoderDrive(0.5, 18, -18, 10);
+                sleep(400);
+                encoderDrive(0.5, 15, 15, 10);
+                encoderDrive(0.5, -18, 18, 10);
+                order = 2;
+            }
 
             // If we have found the desired target, Drive to target Automatically
             if (targetFound && order == 2) {
@@ -858,15 +850,15 @@ public class Autonomous_FarRed extends LinearOpMode
                 Imgproc.putText(input, label, new Point(cX + 10, cY), Imgproc.FONT_HERSHEY_COMPLEX, 0.5, new Scalar(0, 255, 0), 2);
                 Imgproc.circle(input, new Point(cX, cY), 5, new Scalar(0, 255, 0), -1);
             }
-            if ((int)cX > 250 && (int) cX < 800 && (int) maxArea > 7500 &&(int)cY > 300){
+            if ((int)cX > 250 && (int) cX < 800 && (int) maxArea > 5000){
                 spikeTarget = 2;
                 DESIRED_TAG_ID = 5;
             }
-            else if ((int)maxArea > 7500 && (int)cY > 300){
+            else if ((int)maxArea > 5000){
                 spikeTarget = 1;
                 DESIRED_TAG_ID = 4;
             }
-            else if (cY>300){
+            else{
                 spikeTarget = 3;
                 DESIRED_TAG_ID = 6;
             }
