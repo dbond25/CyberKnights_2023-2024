@@ -334,7 +334,7 @@ public class Autonomous_FarBlue extends LinearOpMode
                     armServo.setPosition(0.5);
                     sleep(400);
                     encoderDrive(0.5, 20, 20, 10);
-                    sleep(400);
+                    sleep(500);
 
                 }
                 if (spikeTarget == 1){
