@@ -350,9 +350,9 @@ public class Autonomous_FarRed extends LinearOpMode
                     encoderDrive(0.5, 3, -3, 10);
                     armServo.setPosition(0.5);
                     sleep(400);
-                    encoderDrive(0.5, 42, 42, 10);
+                    encoderDrive(0.5, 44, 44, 10);
                     sleep(400);
-                    encoderDrive(0.5, 18,-18,10);
+                    encoderDrive(0.5, 17,-17,10);
                     encoderDrive(0.5, 55, 55, 10);
                     sleep(400);
                     armServo.setPosition(0);
@@ -858,15 +858,15 @@ public class Autonomous_FarRed extends LinearOpMode
                 Imgproc.putText(input, label, new Point(cX + 10, cY), Imgproc.FONT_HERSHEY_COMPLEX, 0.5, new Scalar(0, 255, 0), 2);
                 Imgproc.circle(input, new Point(cX, cY), 5, new Scalar(0, 255, 0), -1);
             }
-            if ((int)cX > 250 && (int) cX < 800 && (int) maxArea > 5000){
+            if ((int)cX > 250 && (int) cX < 800 && (int) maxArea > 7500 &&(int)cY > 300){
                 spikeTarget = 2;
                 DESIRED_TAG_ID = 5;
             }
-            else if ((int)maxArea > 5000){
+            else if ((int)maxArea > 7500 && (int)cY > 300){
                 spikeTarget = 1;
                 DESIRED_TAG_ID = 4;
             }
-            else{
+            else if (cY>300){
                 spikeTarget = 3;
                 DESIRED_TAG_ID = 6;
             }

@@ -827,16 +827,15 @@ public class Autonomous_NearRed extends LinearOpMode
                 Imgproc.putText(input, label, new Point(cX + 10, cY), Imgproc.FONT_HERSHEY_COMPLEX, 0.5, new Scalar(0, 255, 0), 2);
                 Imgproc.circle(input, new Point(cX, cY), 5, new Scalar(0, 255, 0), -1);
             }
-             if ((int)cX < 600 && (int) maxArea > 7500){
+             if ((int)cX < 600 && (int) maxArea > 7500 && (int)cY > 300){
                 spikeTarget = 2;
                 DESIRED_TAG_ID = 5;
             }
-            else if ((int)maxArea > 7500
-             ){
+            else if ((int)maxArea > 7500 && (int)cY > 300){
                 spikeTarget = 3;
                 DESIRED_TAG_ID = 6;
             }
-            else{
+             else if (cY>300){
                 spikeTarget = 1;
                 DESIRED_TAG_ID = 4;
             }
