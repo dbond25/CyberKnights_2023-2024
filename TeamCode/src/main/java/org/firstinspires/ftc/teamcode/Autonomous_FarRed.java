@@ -342,19 +342,15 @@ public class Autonomous_FarRed extends LinearOpMode
                     encoderDrive(0.5, 10, -10, 10);
                 }
                 if (spikeTarget == 1){
+                    encoderDrive(0.5, -4, 4, 10);
                     encoderDrive(0.5, 18, 18, 10);
-                    armServo.setPosition(1);
                     sleep(400);
-                    encoderDrive(0.5, 18, -18, 10);
-                    encoderDrive(0.5, 4, 4, 10);
                     leftClaw.setPosition(0.15);
-                    sleep(400);
-                    encoderDrive(0.5, -4,-4,10);
-                    sleep(400);
-                    encoderDrive(0.5, -18, 18, 10);
+                    encoderDrive(0.5, -18, -18, 10);
+                    encoderDrive(0.5, 4, -4, 10);
                     armServo.setPosition(0.5);
                     sleep(400);
-                    encoderDrive(0.5, 23, 23, 10);
+                    encoderDrive(0.5, 45, 45, 10);
                     sleep(400);
                     encoderDrive(0.5, 18,-18,10);
                     encoderDrive(0.5, 55, 55, 10);
@@ -368,12 +364,11 @@ public class Autonomous_FarRed extends LinearOpMode
                     sleep(400);
                     encoderDrive(0.5, 18, -18, 10);
                     sleep(400);
-                    encoderDrive(0.5, 8,8, 10);
+                    encoderDrive(0.5, 3.5,3.5, 10);
                     leftClaw.setPosition(0.15);
                     sleep(400);
-                    encoderDrive(0.5, -8, -8, 10);
+                    encoderDrive(0.5, -3.5, -3.5, 10);
                     sleep(400);
-                    encoderDrive(0.5, -18, 18, 10);
                     encoderDrive(0.5, -18, 18, 10);
                     armServo.setPosition(0.5);
                     sleep(400);
