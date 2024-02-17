@@ -106,7 +106,7 @@ import java.util.concurrent.TimeUnit;
 public class Autonomous_FarRed extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = 8.8; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE = 9; //  this is how close the camera should get to the target (inches)
 
     final double DESIRED_OFFSET = 5;
 
@@ -388,7 +388,13 @@ public class Autonomous_FarRed extends LinearOpMode
 //                order = 1;
 //            }
 //
-
+//            if (order == 1) {
+//                if (spikeTarget == 2) {
+//                    encoderDrive(0.7, 18, -18, 10);
+//                    encoderDrive(0.5, 36, 36, 10);
+//                }
+//                order = 2;
+//            }
 
             // If we have found the desired target, Drive to target Automatically
             if (targetFound && order == 2) {
