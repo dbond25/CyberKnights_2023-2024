@@ -106,7 +106,7 @@ import java.util.concurrent.TimeUnit;
 public class Autonomous_FarBlue extends LinearOpMode
 {
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = 9; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE = 8.8; //  this is how close the camera should get to the target (inches)
 
     final double DESIRED_OFFSET = 5;
 
